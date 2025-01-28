@@ -359,12 +359,14 @@ for (tr in 1:length(traitnames)) {
     
     if (rep_num == 5) {
       CV1out <- plyr::ldply(CV1, data.frame)
-      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", MODEL, ".csv", sep=""), row.names = F)
+      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", Models, ".csv", sep=""), row.names = F)
       }
   }
 }
 
-
+#### plot the output ###
+## run machine learning models 
+## do dapc
 
 
 
