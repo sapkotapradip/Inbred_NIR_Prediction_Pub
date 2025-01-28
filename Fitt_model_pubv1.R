@@ -299,6 +299,11 @@ Eta6 <- list(list(X = ZE, model = "BRR"),     # Env
 
 
 
+
+
+
+
+
 MP_heterosis = list()
 # row_F =1; row_M =1
 for (row_F in rownames(F)) {
