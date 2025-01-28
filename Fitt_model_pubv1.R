@@ -8,6 +8,7 @@
 
 library(dplyr)
 library(prospectr)
+library(BGLR)
 #### reading pheno data for hybrids
 pheno_19CS = read.csv("blues_19CS_hybrids_spectra.csv", check.names = FALSE)
 pheno_19TA = read.csv("blues_19TA_hybrids_spectra.csv", check.names = FALSE)
@@ -294,9 +295,74 @@ Eta6 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K=NIR_mid_parent.ZN1, model="RKHS"),    #NIR1_mid_parent
              list(K=mid_parent.ZNZE1, model="RKHS")) #NIR x env
 
+###Missing for multi-trait models using DA and PH
+
+Models <- list(Eta1, Eta2, Eta3, Eta4, Eta5, Eta6)
+traitnames <- c("yield", "da", "ph")
+pheno_combined[1:10,1:10]
+
+# pheno_yield = pheno_combined[,1:5]
+# pheno_ph = pheno_combined[,c(1:4,6)]
+# pheno_da = pheno_combined[,c(1:4,7)]
+# colnames(pheno_yield)[5] = "blue"
+# colnames(pheno_ph)[5] = "blue"
+# colnames(pheno_da)[5] = "blue"
+# 
+# 
+# write.csv(pheno_yield, "pheno_yield.csv")
+# write.csv(pheno_da, "pheno_da.csv")
+# write.csv(pheno_ph, "pheno_ph.csv")
 
 
+# 70:30 partition testing
 
+# tr=1
+set.seed(1234)
+for (tr in 1:length(traitnames)) {
+  
+  if (tr == 1) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==2) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  }
+  
+  # cross-validation #
+  hybrid = as.character(unique(pheno$pedigree))
+  Phenotype_data1 = pheno
+  
+  cycles = 10
+  CV2 = list()
+  CV1 = list()
+  
+  #MODEL =6; rep_num=1
+  for (MODEL in 1:length(Models)) {  
+    
+    for (rep_num in 1:5) {
+      test_geno <- sample(hybrid, round(0.3*length(hybrid)))  
+      train_geno <-setdiff(hybrid, test_geno)
+      
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y<-NA
+      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
+      
+      y_t<-as.numeric(CV_Data_1_2$Y)
+      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      CV_Data_1_2$yhat <- fit$yHat
+      
+      
+      # CV1
+      df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
+      CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
+      }
+    
+    if (rep_num == 5) {
+      CV1out <- plyr::ldply(CV1, data.frame)
+      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", MODEL, ".csv", sep=""), row.names = F)
+      }
+  }
+}
 
 
 
