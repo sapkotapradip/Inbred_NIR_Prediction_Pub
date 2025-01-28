@@ -9,6 +9,10 @@ Step 4: use lasso, deep learning, or AI models at first; try machine learning mo
 Step 5: Fit multi- trait phenomic model using DA and PH from parents to compare predictability
 
 
+Step 2: done perfectly; may revise when got time later
+Step 3: Fit the model
+write a code for MP heterosis, high-parent heterosis, 
+
 # Daniel and Noah inputs 
 
 GCA from CS and other locations 
