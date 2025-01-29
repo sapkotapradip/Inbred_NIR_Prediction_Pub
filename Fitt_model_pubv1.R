@@ -470,6 +470,18 @@ p
 dev.off()
 
 
+#############DPAC
+library(adegenet)
+dapc1 = dapc(pheno_combined[,-c(1:7)], pheno_combined$env)
+scatter(dapc1)
+
+
+inbreds_combined = rbind(parents_20CS, parents_20MA)
+dapc2 = dapc(inbreds_combined[,-c(1:5)], inbreds_combined$env)
+scatter(dapc2)
+
+
+
 
 
 
