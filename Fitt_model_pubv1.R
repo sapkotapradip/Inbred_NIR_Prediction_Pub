@@ -21,6 +21,7 @@ parents_20MA = read.csv("blues_20MA_inbreds_spectra.csv", check.names = FALSE)
 
 pheno_combined = rbind(pheno_19CS,pheno_19TA, pheno_20CS, pheno_20MA)
 ne <- as.vector(table(pheno_combined$env)) ## counting the number of observations
+ne
 
 #### loading marker data 
 T92I012 <- read.delim(file = "T92I012.txt", header = TRUE, sep = "\t", dec = ".")
@@ -98,8 +99,6 @@ NIR_19TA = scale(savitzkyGolay(pheno_19TA[,-c(1:7)], m=1, p=1, w=11))
 NIR_20CS = scale(savitzkyGolay(pheno_20CS[,-c(1:7)], m=1, p=1, w=11))
 NIR_20MA = scale(savitzkyGolay(pheno_20MA[,-c(1:7)], m=1, p=1, w=11))
 
-
-
 NIR.d1 = rbind(NIR_19CS, NIR_19TA, NIR_20CS, NIR_20MA) 
 ZN1 = tcrossprod(as.matrix(NIR.d1)/ncol(as.matrix(NIR.d1))) #phenomic relationship matrices
 dim(ZN1) #phenomic relationship matrices from hybrids
@@ -110,32 +109,40 @@ NIR_pheno_parents_20CS = read.csv("blues_20CS_inbreds_spectra.csv", check.names 
 NIR_parents_20CS = NIR_pheno_parents_20CS[,-c(2:5)]
 rownames(NIR_parents_20CS) = NIR_parents_20CS$pedigree
 NIR_parents_20CS = NIR_parents_20CS[,-1]
-F = NIR_parents_20CS[1:45,]
-M = NIR_parents_20CS[46:89,]
+F = NIR_parents_20CS[1:45,] #female parents
+M = NIR_parents_20CS[46:89,] #male parents
 
 
 ## cakculating averages 
 
-library(dplyr)
-available.hybrid
+# library(dplyr)
+# # available.hybrid
+# 
+# averages = list()
+# # row_F =1; row_M =1
+# for (row_F in rownames(F)) {
+#   for (row_M in rownames(M)) {
+#     # Compute the average for the current pair of rows
+#     avg <- (F[row_F, ] + M[row_M, ]) / 2
+#     
+#     # Store the result in the list with a descriptive name
+#     averages[[paste(row_F, row_M, sep = "/")]] <- avg
+#   }
+# }
+# 
+# averages
+# 
+# # Convert the list of averages into a data frame
+# averages_df <- do.call(rbind, averages)
+# write.csv(averages_df, "mid_parent_NIR.csv")
 
-averages = list()
-# row_F =1; row_M =1
-for (row_F in rownames(F)) {
-  for (row_M in rownames(M)) {
-    # Compute the average for the current pair of rows
-    avg <- (F[row_F, ] + M[row_M, ]) / 2
-    
-    # Store the result in the list with a descriptive name
-    averages[[paste(row_F, row_M, sep = "/")]] <- avg
-  }
-}
-
-# Convert the list of averages into a data frame
-averages_df <- do.call(rbind, averages)
+averages_df = read.csv("mid_parent_NIR_20CS_all.csv", check.names = FALSE)
+rownames(averages_df) = averages_df[,1]
+averages_df = averages_df[,-1]
 
 # Ensure the row names of averages_df are accessible
-averages_pedigrees <- rownames(averages_df)
+# averages_pedigrees <- rownames(averages_df) this one is when calculating using above loop
+averages_pedigrees = rownames(averages_df)
 pedigrees_list = pheno_combined$pedigree
 filtered_df <- averages_df[rownames(averages_df) %in% pedigrees_list, ]
 final_pedigree_df <- filtered_df[match(pedigrees_list, rownames(filtered_df)), ]
@@ -143,16 +150,16 @@ final_pedigree_df <- filtered_df[match(pedigrees_list, rownames(filtered_df)), ]
 mid_parent_19CS = final_pedigree_df[1:364,]
 mid_parent_19TA = final_pedigree_df[365:543,]
 mid_parent_20CS = final_pedigree_df[544:907,]
-mid_parent_20LY = final_pedigree_df[-c(1:907),]
+mid_parent_20MA = final_pedigree_df[-c(1:907),]
 
 ## estimate first derivative of mid-parent NIR spectra
 
 NIR_mid_parent_19CS = scale(savitzkyGolay(mid_parent_19CS, m=1, p=1, w=11))
 NIR_mid_parent_19TA = scale(savitzkyGolay(mid_parent_19TA, m=1, p=1, w=11))
 NIR_mid_parent_20CS = scale(savitzkyGolay(mid_parent_20CS, m=1, p=1, w=11))
-NIR_mid_parent_20LY = scale(savitzkyGolay(mid_parent_20LY, m=1, p=1, w=11))
+NIR_mid_parent_20MA = scale(savitzkyGolay(mid_parent_20LY, m=1, p=1, w=11))
 
-NIR_mid_parent.d1 = rbind(NIR_mid_parent_19CS, NIR_mid_parent_19TA, NIR_mid_parent_20CS, NIR_mid_parent_20LY) 
+NIR_mid_parent.d1 = rbind(NIR_mid_parent_19CS, NIR_mid_parent_19TA, NIR_mid_parent_20CS, NIR_mid_parent_20MA) 
 NIR_mid_parent.ZN1 = tcrossprod(as.matrix(NIR_mid_parent.d1)/ncol(as.matrix(NIR_mid_parent.d1))) #phenomic relationship matrices
 dim(NIR_mid_parent.ZN1) #phenomic relationship matrices from hybrids
 
@@ -172,29 +179,29 @@ MP_heterosis
 MP_heterosis_19CS = MP_heterosis[1:364,]
 MP_heterosis_19TA = MP_heterosis[365:543,]
 MP_heterosis_20CS = MP_heterosis[544:907,]
-MP_heterosis_20LY = MP_heterosis[-c(1:907),]
+MP_heterosis_20MA = MP_heterosis[-c(1:907),]
 
 
 ## estimate first derivative of mid-parent_heterosis NIR spectra
 
-NIR_mid_parent_heterosis_19CS = scale(savitzkyGolay(MP_heterosis_19CS, m=1, p=1, w=11))
-NIR_mid_parent_heterosis_19TA = scale(savitzkyGolay(MP_heterosis_19TA, m=1, p=1, w=11))
-NIR_mid_parent_heterosis_20CS = scale(savitzkyGolay(MP_heterosis_20CS, m=1, p=1, w=11))
-NIR_mid_parent_heterosis_20LY = scale(savitzkyGolay(MP_heterosis_20LY, m=1, p=1, w=11))
+NIR_MP_heterosis_19CS = scale(savitzkyGolay(MP_heterosis_19CS, m=1, p=1, w=11))
+NIR_MP_heterosis_19TA = scale(savitzkyGolay(MP_heterosis_19TA, m=1, p=1, w=11))
+NIR_MP_heterosis_20CS = scale(savitzkyGolay(MP_heterosis_20CS, m=1, p=1, w=11))
+NIR_MP_heterosis_20MA = scale(savitzkyGolay(MP_heterosis_20MA, m=1, p=1, w=11))
 
-NIR_mid_parent_heterosis.d1 = rbind(NIR_mid_parent_heterosis_19CS, 
-                                    NIR_mid_parent_heterosis_19TA, 
-                                    NIR_mid_parent_heterosis_20CS, 
-                                    NIR_mid_parent_heterosis_20LY) 
+NIR_MP_heterosis.d1 = rbind(NIR_MP_heterosis_19CS, #combine all
+                            NIR_MP_heterosis_19TA, 
+                            NIR_MP_heterosis_20CS, 
+                            NIR_MP_heterosis_20MA) 
 
-NIR_mid_parent_heterosis.ZN1 = tcrossprod(as.matrix(NIR_mid_parent_heterosis.d1)/ncol(as.matrix(NIR_mid_parent_heterosis.d1))) #phenomic relationship matrices
-dim(NIR_mid_parent_heterosis.ZN1) #phenomic relationship matrices from NIR_mid_parent_heterosis
+NIR_MP_heterosis.ZN1 = tcrossprod(as.matrix(NIR_MP_heterosis.d1)/ncol(as.matrix(NIR_MP_heterosis.d1))) #phenomic relationship matrices
+dim(NIR_MP_heterosis.ZN1) #phenomic relationship matrices from NIR_mid_parent_heterosis
 
 
 ######### High parent heterosis 
-F;M
-available.hybrid
-write.csv(pheno_combined$pedigree, "total.hybrids.csv")
+# F;M
+# available.hybrid
+# write.csv(pheno_combined$pedigree, "total.hybrids.csv")
 
 hybrids = read.csv("total.hybrids.csv")
 F$female = rownames(F)
@@ -211,34 +218,34 @@ males_numeric = males_hybrids[,-c(1:3)]
 High_parent_values = pmax(males_numeric, females_numeric)
 High_parent_heterosis = (combined_NIR_F1-High_parent_values)/High_parent_values
 
-High_perent_heterosis_19CS = High_parent_heterosis[1:364,]
-High_parent_heterosis_19TA = High_parent_heterosis[365:543,]
-High_parent_heterosis_20CS = High_parent_heterosis[544:907,]
-High_parent_heterosis_20LY = High_parent_heterosis[-c(1:907),]
+HP_heterosis_19CS = High_parent_heterosis[1:364,]
+HP_heterosis_19TA = High_parent_heterosis[365:543,]
+HP_heterosis_20CS = High_parent_heterosis[544:907,]
+HP_heterosis_20MA = High_parent_heterosis[-c(1:907),]
 
 
 # calculation of heterosis using high parent values i.e. high parent hterosis
 
-NIR_high_parent_heterosis_19CS = scale(savitzkyGolay(High_perent_heterosis_19CS, m=1, p=1, w=11))
-NIR_high_parent_heterosis_19TA = scale(savitzkyGolay(High_parent_heterosis_19TA, m=1, p=1, w=11))
-NIR_high_parent_heterosis_20CS = scale(savitzkyGolay(High_parent_heterosis_20CS, m=1, p=1, w=11))
-NIR_high_parent_heterosis_20LY = scale(savitzkyGolay(High_parent_heterosis_20LY, m=1, p=1, w=11))
+NIR_HP_heterosis_19CS = scale(savitzkyGolay(HP_heterosis_19CS, m=1, p=1, w=11))
+NIR_HP_heterosis_19TA = scale(savitzkyGolay(HP_heterosis_19TA, m=1, p=1, w=11))
+NIR_HP_heterosis_20CS = scale(savitzkyGolay(HP_heterosis_20CS, m=1, p=1, w=11))
+NIR_HP_heterosis_20MA = scale(savitzkyGolay(HP_heterosis_20MA, m=1, p=1, w=11))
 
-NIR_high_parent_heterosis.d1 = rbind(NIR_high_parent_heterosis_19CS, 
-                                     NIR_high_parent_heterosis_19TA, 
-                                     NIR_high_parent_heterosis_20CS, 
-                                     NIR_high_parent_heterosis_20LY) 
+NIR_HP_heterosis.d1 = rbind(NIR_HP_heterosis_19CS, 
+                            NIR_HP_heterosis_19TA, 
+                            NIR_HP_heterosis_20CS, 
+                            NIR_HP_heterosis_20MA) 
 
-NIR_high_parent_heterosis.ZN1 = tcrossprod(as.matrix(NIR_high_parent_heterosis.d1)/ncol(as.matrix(NIR_high_parent_heterosis.d1))) #phenomic relationship matrices
-dim(NIR_high_parent_heterosis.ZN1) 
-
+NIR_HP_heterosis.ZN1 = tcrossprod(as.matrix(NIR_HP_heterosis.d1)/ncol(as.matrix(NIR_HP_heterosis.d1))) #phenomic relationship matrices
+dim(NIR_HP_heterosis.ZN1) 
 
 # Set the predictors/priors to run the model
 # mid-parent
 
-mid_parent.ZNZE1 = NIR_mid_parent.ZN1 * ZEZEt
-mid_parent_heterosis_ZNZE1 = NIR_mid_parent_heterosis.ZN1 * ZEZEt
-high_parent.ZNZE1 = NIR_high_parent_heterosis.ZN1 * ZEZEt
+# calculating NIR x E interaction for different models using Hadamard product
+mid_parent.ZNZE1           = NIR_mid_parent.ZN1 * ZEZEt
+mid_parent_heterosis_ZNZE1 = NIR_MP_heterosis.ZN1 * ZEZEt
+high_parent.ZNZE1          = NIR_HP_heterosis.ZN1 * ZEZEt
 
 
 
@@ -257,31 +264,31 @@ Eta1 <- list(list(X = ZE, model = "BRR"),     # Env
 
 ##### first derivative of mid_parent NIR
 
-Eta2<-list(list(X=ZE,model="BRR"),      #Env
-           list(K=NIR_mid_parent.ZN1, model="RKHS"),    #NIR1
-           list(K=mid_parent.ZNZE1, model="RKHS")) #NIR1 x Env
+Eta2<-list(list(X = ZE, model = "BRR"),      #Env
+           list(K= NIR_mid_parent.ZN1, model = "RKHS"),    #NIR1
+           list(K = mid_parent.ZNZE1, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent heterosis NIR
 
-Eta3<-list(list(X=ZE,model="BRR"),      #Env
-           list(K=NIR_mid_parent_heterosis.ZN1, model="RKHS"),    #NIR1
-           list(K=mid_parent_heterosis_ZNZE1, model="RKHS"))  #NIR1 x Env
+Eta3<-list(list(X = ZE,model="BRR"),      #Env
+           list(K = NIR_MP_heterosis.ZN1, model="RKHS"),    #NIR1
+           list(K = mid_parent_heterosis_ZNZE1, model="RKHS"))  #NIR1 x Env
 
 ##### first derivative of high_parent heterosis NIR
 
-Eta4<-list(list(X=ZE,model="BRR"),      #Env
-           list(K=NIR_high_parent_heterosis.ZN1, model="RKHS"),    #NIR1
-           list(K=high_parent.ZNZE1, model="RKHS")) #NIR1 x Env
+Eta4<-list(list(X = ZE,model = "BRR"),      #Env
+           list(K = NIR_HP_heterosis.ZN1, model = "RKHS"),    #NIR1
+           list(K = high_parent.ZNZE1, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent + high-parent heterosis NIR
 
-Eta5<-list(list(X=ZE,model="BRR"),      #Env
-           list(K=NIR_mid_parent_heterosis.ZN1, model="RKHS"),    #NIR1
-           list(K=mid_parent_heterosis_ZNZE1, model="RKHS"),
-           list(K=NIR_high_parent_heterosis.ZN1, model="RKHS"),    #NIR1
-           list(K=high_parent.ZNZE1, model="RKHS")) #NIR1 x Env
+Eta5<-list(list(X = ZE,model="BRR"),      #Env
+           list(K = NIR_MP_heterosis.ZN1, model="RKHS"),    #NIR1
+           list(K = mid_parent_heterosis_ZNZE1, model="RKHS"),
+           list(K = NIR_HP_heterosis.ZN1, model="RKHS"),    #NIR1
+           list(K = high_parent.ZNZE1, model="RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent NIR + genomic
@@ -296,6 +303,16 @@ Eta6 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K=mid_parent.ZNZE1, model="RKHS")) #NIR x env
 
 ###Missing for multi-trait models using DA and PH
+
+
+### 6 different models 
+# MODEL 1: Genomic model
+# MODEL 2: Mid-parent model
+# MODEL 3: mid_parent heterosis NIR
+# MODEL 4: high_parent heterosis NIR
+# MODEL 5: mid_parent + high-parent heterosis NIR
+# MODEL 6: first derivative of mid_parent NIR + genomic
+
 
 Models <- list(Eta1, Eta2, Eta3, Eta4, Eta5, Eta6)
 traitnames <- c("yield", "da", "ph")
@@ -348,7 +365,7 @@ for (tr in 1:length(traitnames)) {
       CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
       
       y_t<-as.numeric(CV_Data_1_2$Y)
-      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=500,burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
       CV_Data_1_2$yhat <- fit$yHat
       
       
@@ -356,13 +373,111 @@ for (tr in 1:length(traitnames)) {
       df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
       CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
       }
-    
+    #rep_num =1
     if (rep_num == 5) {
       CV1out <- plyr::ldply(CV1, data.frame)
-      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", Models, ".csv", sep=""), row.names = F)
+      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", MODEL, ".csv", sep=""), row.names = FALSE)
       }
   }
 }
+
+####### plotting the results
+# quick view of result
+
+setwd("output/")
+###lets plot
+library(plyr)
+library(readr)
+library(dplyr)
+library(stringr)
+
+list_csv_files <- list.files("../output/")
+df2 <- readr::read_csv(list_csv_files, id = "file_name") %>% as.data.frame()
+df2
+write.csv(df2, "Pred.ability.70:30_5rep.csv")
+df2 = read.csv("Pred.ability.70:30_5rep.csv")
+
+df1 = df2 %>%
+  mutate(split_file_name = str_split(file_name, "_", simplify = TRUE)) %>%
+  mutate(trait = split_file_name[, 2],
+         model = split_file_name[, 4], ".csv") 
+
+df1 =
+  df1  %>%
+  mutate(
+    model = case_when(
+      model == "1.csv" ~ "G",
+      model == "2.csv" ~ "MP",
+      model == "3.csv" ~ "MPH",
+      model == "4.csv" ~ "HPH",
+      model == "5.csv" ~ "MPH + HPH",
+      model == "6.csv" ~ "G + MP",
+      TRUE~model),
+    trait = case_when(
+      trait == "yield" ~ "Grain Yield",
+      trait == "ph" ~ "Plant Height",
+      trait == "da" ~ "Days to Anthesis",
+      TRUE~trait)
+  )
+
+df1 = df1[,c(3,4,6,7)]
+
+
+df1 <- as.data.frame(df1 %>%  dplyr::group_by(trait,model) %>% 
+                       dplyr::summarise(M = mean(cor, na.rm=TRUE),
+                                        SD = sd(cor, na.rm=TRUE)))
+#df1 = read.csv("df1.csv")
+df1$trait <- factor(df1$trait, levels =  c("Grain Yield", "Plant Height", "Days to Anthesis"))
+df1$model <- factor(df1$model, levels =  c("G", "MP", "G + MP", "MPH", "HPH", "MPH + HPH"))
+
+library(tidyr)
+library(ggplot2)
+
+
+
+p = ggplot(df1, aes(model, y=M, fill=trait)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=round(M,2)  ), hjust=3, color="white",
+            position = position_dodge(0.9), angle = 90,size=3.5)+
+  geom_errorbar(aes(ymin=M, ymax=M+SD), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~trait)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Agronomic traits") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=12, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=12, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=7, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=7, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 8, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 8, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
+
+jpeg("Pred.ability.jpeg",width = 9,height =4,units = "in", res=600)
+p
+dev.off()
+
+
+
+
+
+jpeg("pred_acc.jpeg",width = 9,height =4,units = "in", res=600)
+p
+dev.off()
+
+
 
 #### plot the output ###
 ## run machine learning models 
