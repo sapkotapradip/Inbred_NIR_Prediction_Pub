@@ -520,21 +520,258 @@ for (tr in 1:length(traitnames)) {
   }
 }
 
+
+#################use parental phenotypic data:
+# multi-trait GS and PS
+# use parents data from 20CS
+setwd("../../")
+parents_pheno_20CS = read.csv("blues_20CS_pheno_parents.csv")
+parents_pheno_20MA = read.csv("blues_20MA_pheno_parents.csv")
+
+rownames(parents_pheno_20CS) = parents_pheno_20CS$pedigree
+parents_pheno_20CS = parents_pheno_20CS[,-c(1,2)]
+
+F_20CS = parents_pheno_20CS[1:45,] #female parents
+M_20CS = parents_pheno_20CS[46:89,] #male parents
+
+
+library(dplyr)
+# available.hybrid
+
+averages = list()
+# row_F =1; row_M =1
+for (row_F in rownames(F_20CS)) {
+  for (row_M in rownames(M_20CS)) {
+    # Compute the average for the current pair of rows
+    avg <- (F_20CS[row_F, ] + M_20CS[row_M, ]) / 2
+
+    # Store the result in the list with a descriptive name
+    averages[[paste(row_F, row_M, sep = "/")]] <- avg
+  }
+}
+
+averages
+
+# Convert the list of averages into a data frame
+averages_df <- do.call(rbind, averages)
+write.csv(averages_df, "mid_parent_pheno_20CS_all.csv")
+
+######### mid_parent values
+
+rownames(parents_pheno_20MA) = parents_pheno_20MA$pedigree
+parents_pheno_20MA = parents_pheno_20MA[,-c(1,2)]
+
+F_20MA = parents_pheno_20MA[1:45,] #female parents
+M_20MA = parents_pheno_20MA[46:89,] #male parents
+
+
+library(dplyr)
+# available.hybrid
+
+averages = list()
+# row_F =1; row_M =1
+for (row_F in rownames(F_20MA)) {
+  for (row_M in rownames(M_20MA)) {
+    # Compute the average for the current pair of rows
+    avg <- (F_20MA[row_F, ] + M_20MA[row_M, ]) / 2
+    
+    # Store the result in the list with a descriptive name
+    averages[[paste(row_F, row_M, sep = "/")]] <- avg
+  }
+}
+
+averages
+
+# Convert the list of averages into a data frame
+averages_df <- do.call(rbind, averages)
+write.csv(averages_df, "mid_parent_pheno_20MA_all.csv")
+
+## combining with 20CS parents values
+pheno_hybrids_yield = read.csv("pheno_yield.csv")
+pheno_hybrids_da = read.csv("pheno_da.csv")
+pheno_hybrids_ph = read.csv("pheno_ph.csv")
+
+## using mid parent of 20CS
+mid_parent_pheno_20CS = read.csv("mid_parent_pheno_20CS_all.csv")
+
+
+pedigrees_list = pheno_hybrids_yield$pedigree
+filtered_df <- mid_parent_pheno_20CS[mid_parent_pheno_20CS$X %in% pedigrees_list, ]
+final_pedigree_df <- filtered_df[match(pedigrees_list, filtered_df$X), ]
+
+colnames(final_pedigree_df)[2] = "gy_mid_parent"
+colnames(final_pedigree_df)[3] = "ph_mid_parent"
+colnames(final_pedigree_df)[4] = "dy_mid_parent"
+pheno_gy_20CS = cbind(pheno_hybrids_yield,final_pedigree_df[,c(2,3,4)])
+pheno_gy_20CSMP = pheno_gy_20CS[,-1]
+
+pheno_da_20CSMP = cbind(pheno_hybrids_da, final_pedigree_df[,c(2,3,4)])
+pheno_ph_20CSMP = cbind(pheno_hybrids_ph, final_pedigree_df[,c(2,3,4)])
+
+pheno_da_20CSMP = pheno_da_20CSMP[,-1]
+pheno_ph_20CSMP = pheno_ph_20CSMP[,-1]
+
+
+write.csv(pheno_gy_20CSMP, "pheno_yield_20CSMP.csv")
+write.csv(pheno_da_20CSMP, "pheno_da_20CSMP.csv")
+write.csv(pheno_ph_20CSMP, "pheno_ph_20CSMP.csv")
+
+## using mid parent of 20MA
+mid_parent_pheno_20MA = read.csv("mid_parent_pheno_20MA_all.csv")
+
+pedigrees_list = pheno_hybrids_yield$pedigree
+filtered_df <- mid_parent_pheno_20MA[mid_parent_pheno_20MA$X %in% pedigrees_list, ]
+final_pedigree_df <- filtered_df[match(pedigrees_list, filtered_df$X), ]
+
+colnames(final_pedigree_df)[2] = "gy_mid_parent"
+colnames(final_pedigree_df)[3] = "ph_mid_parent"
+colnames(final_pedigree_df)[4] = "dy_mid_parent"
+pheno_gy_20MA = cbind(pheno_hybrids_yield,final_pedigree_df[,c(2,3,4)])
+pheno_gy_20MAMP = pheno_gy_20MA[,-1]
+
+pheno_da_20MAMP = cbind(pheno_hybrids_da, final_pedigree_df[,c(2,3,4)])
+pheno_ph_20MAMP = cbind(pheno_hybrids_ph, final_pedigree_df[,c(2,3,4)])
+
+pheno_da_20MAMP = pheno_da_20MAMP[,-1]
+pheno_ph_20MAMP = pheno_ph_20MAMP[,-1]
+
+
+write.csv(pheno_gy_20MAMP, "pheno_yield_20MAMP.csv")
+write.csv(pheno_da_20MAMP, "pheno_da_20MAMP.csv")
+write.csv(pheno_ph_20MAMP, "pheno_ph_20MAMP.csv")
+
+### run the model with multi-trait PS models
+
+
+# tr=1
+set.seed(1234)
+mpnames = c("20CSMP", "20MAMP")
+
+## adding multi_trait models also
+
+# tr =1; mp =1
+for (tr in 1:length(traitnames)) {
+  for (mp in 1:length(mpnames)){
+    
+  if (tr == 1) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], "_", mpnames[mp], ".csv", sep = ""))
+  } else if (tr ==2) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], "_", mpnames[mp], ".csv", sep = ""))
+  } else {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr],"_", mpnames[mp], ".csv", sep = ""))
+  }
+  
+  # cross-validation #
+  hybrid = as.character(unique(pheno$pedigree))
+  Phenotype_data1 = pheno
+  
+  cycles = 10
+  CV3 = list()
+  CV2 = list()
+  CV1 = list()
+  
+  
+  #MODEL =6; rep_num=1
+  for (MODEL in 1:length(Models)) {  
+    
+    for (rep_num in 1:5) {
+      test_geno <- sample(hybrid, round(0.3*length(hybrid)))  
+      train_geno <-setdiff(hybrid, test_geno)
+      
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y<-NA
+      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
+      
+      y_t<-as.numeric(CV_Data_1_2$Y)
+      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=500,burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
+      CV_Data_1_2$yhat <- fit$yHat
+      
+      
+      # CV1
+      df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
+      CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
+      
+      # multi_trait using yield, anthesis and height
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y<-NA
+      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno]
+      
+      y_t1 = as.matrix(CV_Data_1_2[,c(7,8,9,10)]) #all the traits
+      fit1<- Multitrait(y = y_t1, ETA = Models[[MODEL]], nIter = 500, burnIn = 100, thin = 10)
+      whichNA = fit1$missing_records[fit1$patterns[,4]]
+      pred = fit1$ETAHat[whichNA,] #predicted values
+      
+      df_test1 <- subset(pheno, pheno$pedigree %in% test_geno)
+      df_test1 = cbind(df_test, pred[,4])
+      colnames(df_test1)[10] = "yhat"
+      CV2[[rep_num]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat, use = "complete.obs")))
+      
+      
+      # multi_trait using anthesis and height
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y<-NA
+      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno]
+      
+      y_t2 = as.matrix(CV_Data_1_2[,c(8,9,10)]) # days to anthesis and plant height
+      fit2<- Multitrait(y = y_t2, ETA = Models[[MODEL]], nIter = 500, burnIn = 100, thin = 10)
+      whichNA = fit2$missing_records[fit2$patterns[,3]]
+      pred = fit2$ETAHat[whichNA,] #predicted values
+      
+      df_test2 <- subset(pheno, pheno$pedigree %in% test_geno)
+      df_test2 = cbind(df_test2, pred[,3])
+      colnames(df_test2)[10] = "yhat"
+      CV3[[rep_num]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat, use = "complete.obs")))
+    }
+    #rep_num =1
+    if (rep_num == 5) {
+      CV1out <- plyr::ldply(CV1, data.frame)
+      CV2out <- plyr::ldply(CV2, data.frame)
+      CV3out <- plyr::ldply(CV3, data.frame)
+      write.csv(CV1out, file = paste("ACC_", traitnames[tr], "_", mpnames[mp], "_CV1_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("ACC_", traitnames[tr], "_", mpnames[mp], "_CV2_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out, file = paste("ACC_", traitnames[tr], "_", mpnames[mp], "_CV3_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+      
+    }
+  }
+
+
+
+
+
+rownames(pheno_hybrids_yield_20MAyield) = NULL
+pheno_hybrids_yield_20MAparents = pheno_hybrids_yield_20MAyield[,-1]
+
+### add parent's pheno from 20CS
+
+
+averages_pedigrees = rownames(averages_df)
+pedigrees_list = pheno_combined$pedigree
+filtered_df <- averages_df[rownames(averages_df) %in% pedigrees_list, ]
+final_pedigree_df <- filtered_df[match(pedigrees_list, rownames(filtered_df)), ]
+
+
+
+# calculate mid_parent values
+
+#leave parents out model
+# random forest and svm for GS and PS
+# multi-trait GS
+
 ####### plotting the results
 # quick view of result
 
-setwd("output/")
+setwd("output/11_models/")
 ###lets plot
 library(plyr)
 library(readr)
 library(dplyr)
 library(stringr)
 
-list_csv_files <- list.files("../output/")
+list_csv_files <- list.files("../11_models/")
 df2 <- readr::read_csv(list_csv_files, id = "file_name") %>% as.data.frame()
 df2
-write.csv(df2, "Pred.ability.70:30_5rep.csv")
-df2 = read.csv("Pred.ability.70:30_5rep.csv")
+write.csv(df2, "Pred.ability.70_30_5rep_11models.csv")
+df2 = read.csv("Pred.ability.70_30_5rep_11models.csv")
 
 df1 = df2 %>%
   mutate(split_file_name = str_split(file_name, "_", simplify = TRUE)) %>%
@@ -609,11 +846,90 @@ p
 dev.off()
 
 
+## for 11 models 
+df1 =
+  df1  %>%
+  mutate(
+    model = case_when(
+      model == "1.csv" ~ "G",
+      model == "2.csv" ~ "MP_20CS",
+      model == "3.csv" ~ "MPH_20CS",
+      model == "4.csv" ~ "HPH_20CS",
+      model == "5.csv" ~ "MPH + HPH_20CS",
+      model == "6.csv" ~ "G + MP_20CS",
+      model == "7.csv" ~ "MP_20LY",
+      model == "8.csv" ~ "MPH_20LY",
+      model == "9.csv" ~ "HPH_20LY",
+      model == "10.csv" ~ "MPH + HPH_20LY",
+      model == "11.csv" ~ "G + MP_20LY",
+      
+      TRUE~model),
+    trait = case_when(
+      trait == "yield" ~ "Grain Yield",
+      trait == "ph" ~ "Plant Height",
+      trait == "da" ~ "Days to Anthesis",
+      TRUE~trait)
+  )
+
+df1 = df1[,c(3,4,6,7)]
+
+
+df1 <- as.data.frame(df1 %>%  dplyr::group_by(trait,model) %>% 
+                       dplyr::summarise(M = mean(cor, na.rm=TRUE),
+                                        SD = sd(cor, na.rm=TRUE)))
+#df1 = read.csv("df1.csv")
+df1$trait <- factor(df1$trait, levels =  c("Grain Yield", "Plant Height", "Days to Anthesis"))
+df1$model <- factor(df1$model, levels =  c("G", "MP_20CS", "G + MP_20CS", "MPH_20CS", "HPH_20CS", "MPH + HPH_20CS",
+                                           "MP_20LY", "G + MP_20LY", "MPH_20LY", "HPH_20LY", "MPH + HPH_20LY"))
+
+library(tidyr)
+library(ggplot2)
+
+
+
+p = ggplot(df1, aes(model, y=M, fill=trait)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=round(M,2)  ), hjust=3, color="white",
+            position = position_dodge(0.9), angle = 90,size=3.5)+
+  geom_errorbar(aes(ymin=M, ymax=M+SD), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~trait)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Agronomic traits") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=12, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=12, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=7, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=7, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 8, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 8, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
+
+jpeg("Pred.ability_20LY.jpeg",width = 9,height =4,units = "in", res=600)
+p
+dev.off()
+
+
 #############DPAC
 library(adegenet)
 dapc1 = dapc(pheno_combined[,-c(1:7)], pheno_combined$env)
-scatter(dapc1)
+p = scatter(dapc1)
 
+jpeg("dapc1.jpeg",width = 9,height =4,units = "in", res=600)
+p
+dev.off()
 
 inbreds_combined = rbind(parents_20CS, parents_20MA)
 dapc2 = dapc(inbreds_combined[,-c(1:5)], inbreds_combined$env)
