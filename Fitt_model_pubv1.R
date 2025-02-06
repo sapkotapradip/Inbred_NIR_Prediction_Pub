@@ -471,7 +471,17 @@ dev.off()
 
 
 #############DPAC
+#K means clustering; that needs to yield lower BIC;
+# runa fter transforming the data using PCA
+
+
 library(adegenet)
+data("dapcIllus")
+class(dapcIllus)
+names(dapcIllus)
+x <- dapcIllus$a
+grp <- find.clusters(x, max.n.clust = 40)
+
 dapc1 = dapc(pheno_combined[,-c(1:7)], pheno_combined$env)
 scatter(dapc1)
 
@@ -481,7 +491,18 @@ dapc2 = dapc(inbreds_combined[,-c(1:5)], inbreds_combined$env)
 scatter(dapc2)
 
 
-
+scatter(dapc1, 
+       scree.da=FALSE, 
+       bg="white", 
+       pch=20, 
+       cell=0, 
+       cstar=0, 
+       #col=myCol, 
+       solid=.4, 
+       cex=3,
+       clab=0, 
+       leg=TRUE, 
+       txt.leg=paste("Cluster",1:6))
 
 
 
@@ -489,7 +510,7 @@ jpeg("pred_acc.jpeg",width = 9,height =4,units = "in", res=600)
 p
 dev.off()
 
-
+#############
 
 #### plot the output ###
 ## run machine learning models 

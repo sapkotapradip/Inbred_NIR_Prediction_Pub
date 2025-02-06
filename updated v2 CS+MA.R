@@ -702,9 +702,9 @@ for (tr in 1:length(traitnames)) {
       pred = fit1$ETAHat[whichNA,] #predicted values
       
       df_test1 <- subset(pheno, pheno$pedigree %in% test_geno)
-      df_test1 = cbind(df_test, pred[,4])
-      colnames(df_test1)[10] = "yhat"
-      CV2[[rep_num]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat, use = "complete.obs")))
+      df_test1 = cbind(df_test1, pred[,4])
+      colnames(df_test1)[10] = "yhat1"
+      CV2[[rep_num]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat1, use = "complete.obs")))
       
       
       # multi_trait using anthesis and height
@@ -719,8 +719,8 @@ for (tr in 1:length(traitnames)) {
       
       df_test2 <- subset(pheno, pheno$pedigree %in% test_geno)
       df_test2 = cbind(df_test2, pred[,3])
-      colnames(df_test2)[10] = "yhat"
-      CV3[[rep_num]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat, use = "complete.obs")))
+      colnames(df_test2)[10] = "yhat2"
+      CV3[[rep_num]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat2, use = "complete.obs")))
     }
     #rep_num =1
     if (rep_num == 5) {
@@ -733,9 +733,10 @@ for (tr in 1:length(traitnames)) {
       
     }
   }
+  }
+}
 
-
-
+########## wow; just wow
 
 
 rownames(pheno_hybrids_yield_20MAyield) = NULL
