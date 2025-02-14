@@ -794,7 +794,12 @@ df1 =
       trait == "yield" ~ "Grain Yield",
       trait == "ph" ~ "Plant Height",
       trait == "da" ~ "Days to Anthesis",
-      TRUE~trait)
+      TRUE~trait),
+    CV_scheme = case_when(
+      CV_scheme == "CV1" ~ "single_trait",
+      CV_scheme == "CV2" ~ "GY + PH",
+      CV_scheme == "CV3" ~ "DA + PH"
+    )
   )
 
 df1 = df1[,c(3,4,6,7)]
@@ -846,42 +851,60 @@ jpeg("Pred.ability.jpeg",width = 9,height =4,units = "in", res=600)
 p
 dev.off()
 
+df1 = read.csv("Pred.ability.11models_3CV.csv")
+
+df1 = df1 %>%
+  mutate(split_file_name = str_split(file_name, "_", simplify = TRUE)) %>%
+  mutate(trait = split_file_name[, 2],
+         NIR = split_file_name[, 3],
+         CV_scheme = split_file_name[, 4],
+         model = split_file_name[, 5], ".csv") 
+
 
 ## for 11 models 
 df1 =
   df1  %>%
   mutate(
     model = case_when(
-      model == "1.csv" ~ "G",
-      model == "2.csv" ~ "MP_20CS",
-      model == "3.csv" ~ "MPH_20CS",
-      model == "4.csv" ~ "HPH_20CS",
-      model == "5.csv" ~ "MPH + HPH_20CS",
-      model == "6.csv" ~ "G + MP_20CS",
-      model == "7.csv" ~ "MP_20LY",
-      model == "8.csv" ~ "MPH_20LY",
-      model == "9.csv" ~ "HPH_20LY",
-      model == "10.csv" ~ "MPH + HPH_20LY",
-      model == "11.csv" ~ "G + MP_20LY",
+      model == "1" ~ "G",
+      model == "2" ~ "MP_20CS",
+      model == "3" ~ "MPH_20CS",
+      model == "4" ~ "HPH_20CS",
+      model == "5" ~ "MPH + HPH_20CS",
+      model == "6" ~ "G + MP_20CS",
+      model == "7" ~ "MP_20LY",
+      model == "8" ~ "MPH_20LY",
+      model == "9" ~ "HPH_20LY",
+      model == "10" ~ "MPH + HPH_20LY",
+      model == "11" ~ "G + MP_20LY",
       
       TRUE~model),
     trait = case_when(
       trait == "yield" ~ "Grain Yield",
       trait == "ph" ~ "Plant Height",
       trait == "da" ~ "Days to Anthesis",
-      TRUE~trait)
+      TRUE~trait),
+    CV_scheme = case_when(
+      CV_scheme == "CV1" ~ "single_trait",
+      CV_scheme == "CV2" ~ "GY + PH",
+      CV_scheme == "CV3" ~ "DA + PH"
+    )
   )
 
-df1 = df1[,c(3,4,6,7)]
+df2 = df1[,c(3,4,6,7,8,9)]
 
 
-df1 <- as.data.frame(df1 %>%  dplyr::group_by(trait,model) %>% 
+df1 <- as.data.frame(df2 %>%  dplyr::group_by(trait,NIR, CV_scheme, model) %>% 
                        dplyr::summarise(M = mean(cor, na.rm=TRUE),
                                         SD = sd(cor, na.rm=TRUE)))
 #df1 = read.csv("df1.csv")
 df1$trait <- factor(df1$trait, levels =  c("Grain Yield", "Plant Height", "Days to Anthesis"))
 df1$model <- factor(df1$model, levels =  c("G", "MP_20CS", "G + MP_20CS", "MPH_20CS", "HPH_20CS", "MPH + HPH_20CS",
                                            "MP_20LY", "G + MP_20LY", "MPH_20LY", "HPH_20LY", "MPH + HPH_20LY"))
+
+df1$CV_scheme =  factor(df1$CV_scheme, levels =  c("single_trait",
+                                               "GY + PH",
+                                               "DA + PH"))
 
 library(tidyr)
 library(ggplot2)
@@ -891,11 +914,11 @@ library(ggplot2)
 p = ggplot(df1, aes(model, y=M, fill=trait)) +
   geom_bar(stat="identity", position=position_dodge())+
   geom_text(aes(label=round(M,2)  ), hjust=3, color="white",
-            position = position_dodge(0.9), angle = 90,size=3.5)+
+            position = position_dodge(1.2), angle = 90,size=5)+ #size = 3.5, position_dodge(0.9) 
   geom_errorbar(aes(ymin=M, ymax=M+SD), width=.2,
                 position=position_dodge(.9))+
   theme_bw()+
-  facet_grid(~trait)+
+  facet_grid(~trait~NIR~CV_scheme)+
   scale_y_continuous("Prediction ability")+
   xlab("Agronomic traits") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
@@ -918,9 +941,15 @@ p = ggplot(df1, aes(model, y=M, fill=trait)) +
     #axis.text.x.bottom = element_blank()
   )
 
-jpeg("Pred.ability_20LY.jpeg",width = 9,height =4,units = "in", res=600)
+jpeg("Pred.ability_combined.jpeg",width = 9,height =4,units = "in", res=600)
 p
 dev.off()
+
+
+jpeg("Pred.ability_combined.jpeg",width = 9,height =6,units = "in", res=600)
+p
+dev.off()
+
 
 
 #############DPAC
@@ -976,5 +1005,5 @@ for (row_F in rownames(F)) {
 ### calculate mid-parent heterosis
 # hybrid - mid-parent value (should be straightforward)
 # hybrid - high parent -- for this: pick the one having higher values
-
+# if this didnot improve, i might add them as covariate the way daniel did in his paper
 
