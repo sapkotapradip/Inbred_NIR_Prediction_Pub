@@ -25,7 +25,7 @@ ne
 
 #### loading marker data 
 T92I012 <- read.delim(file = "T92I012.txt", header = TRUE, sep = "\t", dec = ".")
-parents = read.delim(file = "parents.txt", header = TRUE, sep = "\t", dec = ".")$pedigree
+parents  = read.delim(file = "parents.txt", header = TRUE, sep = "\t", dec = ".")$pedigree
 
 geno = T92I012 %>% filter(
   X1 %in% parents)
@@ -131,9 +131,6 @@ mid_parent_19TA_20MA = final_pedigree_20MA[365:543,]
 mid_parent_20CS_20MA = final_pedigree_20MA[544:907,]
 mid_parent_20MA_20MA = final_pedigree_20MA[-c(1:907),]
 
-
-
-
 ## estimate first derivative of mid-parent NIR spectra
 # using 20CS
 
@@ -166,7 +163,6 @@ NIR_mid_parent.d1_20MA = rbind(NIR_mid_parent_19CS_20MA,
 NIR_mid_parent.ZN1_20MA = tcrossprod(as.matrix(NIR_mid_parent.d1_20MA)/ncol(as.matrix(NIR_mid_parent.d1_20MA))) #phenomic relationship matrices
 dim(NIR_mid_parent.ZN1_20MA) #phenomic relationship matrices from hybrids
 
-
 ### Mid-parent heterosis ###
 # heterosis = F1-MP/MP
 
@@ -194,9 +190,7 @@ MP_heterosis_20CS_20MA = MP_heterosis_20MA[544:907,]
 MP_heterosis_20MA_20MA = MP_heterosis_20MA[-c(1:907),]
 
 
-
 ## estimate first derivative of mid-parent_heterosis NIR spectra
-
 NIR_MP_heterosis_19CS_20CS = scale(savitzkyGolay(MP_heterosis_19CS_20CS, m=1, p=1, w=11))
 NIR_MP_heterosis_19TA_20CS = scale(savitzkyGolay(MP_heterosis_19TA_20CS, m=1, p=1, w=11))
 NIR_MP_heterosis_20CS_20CS = scale(savitzkyGolay(MP_heterosis_20CS_20CS, m=1, p=1, w=11))
@@ -288,7 +282,6 @@ HP_heterosis_19CS_20MA = High_parent_heterosis_20MA[1:364,]
 HP_heterosis_19TA_20MA = High_parent_heterosis_20MA[365:543,]
 HP_heterosis_20CS_20MA = High_parent_heterosis_20MA[544:907,]
 HP_heterosis_20MA_20MA = High_parent_heterosis_20MA[-c(1:907),]
-
 
 # calculation of heterosis using high parent values i.e. high parent hterosis
 # using 20CS
@@ -492,7 +485,7 @@ for (tr in 1:length(traitnames)) {
   CV2 = list()
   CV1 = list()
   
-  #MODEL =6; rep_num=1
+  #MODEL =2; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
     for (rep_num in 1:5) {
@@ -504,7 +497,7 @@ for (tr in 1:length(traitnames)) {
       CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
       
       y_t<-as.numeric(CV_Data_1_2$Y)
-      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=500,burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
+      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
       CV_Data_1_2$yhat <- fit$yHat
       
       
@@ -524,7 +517,7 @@ for (tr in 1:length(traitnames)) {
 #################use parental phenotypic data:
 # multi-trait GS and PS
 # use parents data from 20CS
-setwd("../../")
+#setwd("../../")
 parents_pheno_20CS = read.csv("blues_20CS_pheno_parents.csv")
 parents_pheno_20MA = read.csv("blues_20MA_pheno_parents.csv")
 
@@ -671,7 +664,7 @@ for (tr in 1:length(traitnames)) {
   CV1 = list()
   
   
-  #MODEL =6; rep_num=1
+  #MODEL =2; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
     for (rep_num in 1:5) {
@@ -727,9 +720,9 @@ for (tr in 1:length(traitnames)) {
       CV1out <- plyr::ldply(CV1, data.frame)
       CV2out <- plyr::ldply(CV2, data.frame)
       CV3out <- plyr::ldply(CV3, data.frame)
-      write.csv(CV1out, file = paste("ACC_", traitnames[tr], "_", mpnames[mp], "_CV1_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
-      write.csv(CV2out, file = paste("ACC_", traitnames[tr], "_", mpnames[mp], "_CV2_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out, file = paste("ACC_", traitnames[tr], "_", mpnames[mp], "_CV3_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+      write.csv(CV1out, file = paste("ACC_singltrait_", traitnames[tr], "_", mpnames[mp], "_CV1_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("ACC_multitrait_", traitnames[tr], "_", mpnames[mp], "_CV2_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out, file = paste("ACC_multitrait_", traitnames[tr], "_", mpnames[mp], "_CV3_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
       
     }
   }
