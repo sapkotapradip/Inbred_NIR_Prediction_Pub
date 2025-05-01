@@ -444,8 +444,7 @@ Eta11 <- list(list(X = ZE, model = "BRR"),     # Env
 # MODEL 10: mid-parent + high_parent heterosis NIR-20CS
 # MODEL 11: first derivative of mid_parent NIR + genomic-20MA
 
-
-
+# tr=1
 Models <- list(Eta1, Eta2, Eta3, Eta4, Eta5, Eta6, Eta7, Eta8, Eta9, Eta10, Eta11)
 traitnames <- c("yield", "da", "ph")
 pheno_combined[1:10,1:10]
@@ -477,21 +476,41 @@ for (tr in 1:length(traitnames)) {
     pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
   }
   
+  
   # cross-validation #
+  parents = c(unique(pheno$female), unique(pheno$male))
   hybrid = as.character(unique(pheno$pedigree))
   Phenotype_data1 = pheno
   
+  set.seed(123)
   cycles = 10
-  CV2 = list()
   CV1 = list()
+  CV2 = list()
+  CV3_20LY = list()
+  CV3_19TA = list()
   
   #MODEL =2; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
     for (rep_num in 1:5) {
-      test_geno <- sample(hybrid, round(0.3*length(hybrid)))  
-      train_geno <-setdiff(hybrid, test_geno)
+      set.seed(123)
+      CVa = sample(parents[1:89], 15, replace = FALSE)
+      train_geno <- setdiff(parents[1:89], CVa)
+      pheno$y = pheno$blue
       
+      for (a in 1:15) {
+        pheno <- pheno %>% mutate(y = replace(y, female == CVa[a], NA))
+      }
+      
+      for (b in 1:15) {
+        pheno <- pheno %>% mutate(y = replace(y, male == CVa[b], NA))
+      }
+      
+      test_pheno <- subset(pheno, is.na(y))
+      test_geno = unique(test_pheno$pedigree) # 30% of hybrid were removed
+      train_geno = setdiff(hybrid, test_geno)
+      
+      # Preparing for CV1
       CV_Data_1_2<-Phenotype_data1
       CV_Data_1_2$Y<-NA
       CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
@@ -501,14 +520,71 @@ for (tr in 1:length(traitnames)) {
       CV_Data_1_2$yhat <- fit$yHat
       
       
-      # CV1
+      # CV1 # untested genotypes in observed environment
       df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
       CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
+      
+      # Preparing for CV2
+      # CV2 simulates sparse testing where 30% of hybrids were sampled from each environments
+      
+      ne <- as.vector(table(pheno$env)) ## counting the number of observations
+      ne
+      
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y = CV_Data_1_2$blue
+      
+      index = c(sample(1:364,round(0.30*364)), sample(365:543,round(0.30*179)), 
+                sample(544:907,round(0.30*364)), sample(908:1094,round(0.30*187)))
+      
+      CV_Data_1_2$Y[index] <- NA
+      
+      y_t1<-as.numeric(CV_Data_1_2$Y)
+      fit1<-BGLR(y=y_t1,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      CV_Data_1_2$yhat1 <- fit1$yHat
+      
+      test_geno = CV_Data_1_2$pedigree[index] 
+      df_test1 <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
+      CV2[[(rep_num)]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat1,use = "complete.obs")))
+      
+      # For CV3
+      # leave environments out #20LY
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y = CV_Data_1_2$blue
+      
+      CV_Data_1_2$Y[CV_Data_1_2$env == "20LY"] <- NA
+      
+      y_t2<-as.numeric(CV_Data_1_2$Y)
+      fit2<-BGLR(y=y_t2,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      CV_Data_1_2$yhat2 <- fit2$yHat
+      
+      df_test2 <- subset(CV_Data_1_2, CV_Data_1_2$env == "20LY")
+      CV3_20LY[[(rep_num)]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat2,use = "complete.obs")))
+      
+      # For CV4
+      # leave environments out #19TA
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y = CV_Data_1_2$blue
+      
+      CV_Data_1_2$Y[CV_Data_1_2$env == "19TA"] <- NA
+      
+      y_t3<-as.numeric(CV_Data_1_2$Y)
+      fit3<-BGLR(y=y_t3,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      CV_Data_1_2$yhat3 <- fit3$yHat
+      
+      df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
+      CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
     }
+    
     #rep_num =1
     if (rep_num == 5) {
       CV1out <- plyr::ldply(CV1, data.frame)
+      CV2out <- plyr::ldply(CV2, data.frame)
+      CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
+      CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
       write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
     }
   }
 }
