@@ -614,8 +614,8 @@ for (tr in 1:length(traitnames)) {
       
       fit1<-BGLR(y=y_t1,
                  ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, 
+                 nIter=500,
+                 burnIn=100, 
                  thin=10) #nIter=5000,burnIn=1000, thin =10
       
       CV_Data_1_2$yhat1 <- fit1$yHat
@@ -634,8 +634,8 @@ for (tr in 1:length(traitnames)) {
       
       fit2<-BGLR(y=y_t2,
                  ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, 
+                 nIter=500,
+                 burnIn=100, 
                  thin=10) #nIter=5000,burnIn=1000, thin =10
       
       CV_Data_1_2$yhat2 <- fit2$yHat
@@ -654,8 +654,8 @@ for (tr in 1:length(traitnames)) {
       
       fit3<-BGLR(y=y_t3,
                  ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+                 nIter=500,
+                 burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
       
       CV_Data_1_2$yhat3 <- fit3$yHat
       
@@ -669,7 +669,13 @@ for (tr in 1:length(traitnames)) {
       sample()
 
       y_t3<-as.numeric(CV_Data_1_2$Y)
-      fit3<-BGLR(y=y_t3,ETA=Models[[MODEL]],nIter=5000,burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      
+      fit3<-BGLR(y=y_t3,
+                 ETA=Models[[MODEL]],
+                 nIter=500,
+                 burnIn=100, 
+                 thin=10) #nIter=5000,burnIn=1000, thin =10
+      
       CV_Data_1_2$yhat3 <- fit3$yHat
 
       df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
