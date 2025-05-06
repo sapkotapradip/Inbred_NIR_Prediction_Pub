@@ -206,7 +206,6 @@ NIR_MP_heterosis.ZN1_20CS = tcrossprod(as.matrix(NIR_MP_heterosis.d1_20CS)/ncol(
 dim(NIR_MP_heterosis.ZN1_20CS) #phenomic relationship matrices from NIR_mid_parent_heterosis
 
 #20MA
-
 NIR_MP_heterosis_19CS_20MA = scale(savitzkyGolay(MP_heterosis_19CS_20MA, m=1, p=1, w=11))
 NIR_MP_heterosis_19TA_20MA = scale(savitzkyGolay(MP_heterosis_19TA_20MA, m=1, p=1, w=11))
 NIR_MP_heterosis_20CS_20MA = scale(savitzkyGolay(MP_heterosis_20CS_20MA, m=1, p=1, w=11))
@@ -380,10 +379,7 @@ Eta1 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K5, model = "RKHS"), # male x environemnt
              list(K = K6, model = "RKHS")) #female x male x environment
 
-# Mid-parent model
-
 ##### first derivative of mid_parent NIR
-
 Eta2<-list(list(X = ZE, model = "BRR"),      #Env
            list(K= NIR_mid_parent.ZN1_20CS, model = "RKHS"),    #NIR1
            list(K = mid_parent.ZNZE1.CS, model = "RKHS")) #NIR1 x Env
@@ -407,7 +403,6 @@ Eta5<-list(list(X = ZE,model = "BRR"),      #Env
 
 
 ##### first derivative of mid_parent + high-parent heterosis NIR
-
 Eta6<-list(list(X = ZE,model="BRR"),      #Env
            list(K = NIR_MP_heterosis.ZN1_20CS, model="RKHS"),    #NIR1
            list(K = mid_parent_heterosis_ZNZE1.CS, model="RKHS"),
@@ -423,34 +418,30 @@ Eta7 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K4, model = "RKHS"), #female x env
              list(K = K5, model = "RKHS"), #male x env
              list(K = K6, model = "RKHS"), #female x male x env
-             list(K=NIR_mid_parent.ZN1_20CS, model="RKHS"),    #NIR1_mid_parent
-             list(K=mid_parent.ZNZE1.CS, model="RKHS")) #NIR x env
+             list(K = NIR_mid_parent.ZN1_20CS, model="RKHS"),    #NIR1_mid_parent
+             list(K = mid_parent.ZNZE1.CS, model="RKHS")) #NIR x env
 
 
 ####Use 20MA
 
 ##### first derivative of mid_parent NIR
-
 Eta8<-list(list(X = ZE, model = "BRR"),      #Env
            list(K= NIR_mid_parent.ZN1_20MA, model = "RKHS"),    #NIR1
            list(K = mid_parent.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent heterosis NIR
-
 Eta9<-list(list(X = ZE,model="BRR"),      #Env
            list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
            list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"))  #NIR1 x Env
 
 ##### first derivative of high_parent heterosis NIR
-
 Eta10<-list(list(X = ZE,model = "BRR"),      #Env
            list(K = NIR_HP_heterosis.ZN1_20MA, model = "RKHS"),    #NIR1
            list(K = High_parent_heterosis_20MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent + high-parent heterosis NIR
-
 Eta11<-list(list(X = ZE,model="BRR"),      #Env
            list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
            list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"),
@@ -465,7 +456,6 @@ Eta12<- list(list(X = ZE,model = "BRR"),      #Env
 
 
 ##### first derivative of mid_parent NIR + genomic 20MA
-
 Eta13 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K1star, model = "RKHS"), # Female
              list(K = K2star, model = "RKHS"), # male
@@ -484,9 +474,6 @@ Eta14 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K4, model = "RKHS"), # Female x environment
              list(K = K5, model = "RKHS")) # male x environemnt
 
-
-# also add high parent values
-             
 
 ###Missing for multi-trait models using DA and PH
 
