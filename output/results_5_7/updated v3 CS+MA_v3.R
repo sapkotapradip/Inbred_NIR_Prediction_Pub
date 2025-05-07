@@ -151,7 +151,6 @@ dim(NIR_mid_parent.ZN1_20CS) #phenomic relationship matrices from hybrids
 
 
 # using 20MA
-
 NIR_mid_parent_19CS_20MA = scale(savitzkyGolay(mid_parent_19CS_20MA, m=1, p=1, w=11))
 NIR_mid_parent_19TA_20MA = scale(savitzkyGolay(mid_parent_19TA_20MA, m=1, p=1, w=11))
 NIR_mid_parent_20CS_20MA = scale(savitzkyGolay(mid_parent_20CS_20MA, m=1, p=1, w=11))
@@ -372,7 +371,7 @@ high_parent_ZNZE1.MA            = NIR_HP_ZN1_20MA * ZEZEt
 # Set ETAs predictors for models
 
 # Genomic model
-Eta1 <- list(list(X = ZE, model = "BRR"),     # Env
+Eta1_CS <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K1star, model = "RKHS"), # Female
              list(K = K2star, model = "RKHS"), # male
              list(K = K3star, model = "RKHS"), # Femalexmale
@@ -381,30 +380,24 @@ Eta1 <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K6, model = "RKHS")) #female x male x environment
 
 ##### first derivative of mid_parent NIR
-Eta2<-list(list(X = ZE, model = "BRR"),      #Env
+Eta2_CS <-list(list(X = ZE, model = "BRR"),      #Env
            list(K= NIR_mid_parent.ZN1_20CS, model = "RKHS"),    #NIR1
            list(K = mid_parent.ZNZE1.CS, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent heterosis NIR
-Eta3<-list(list(X = ZE,model="BRR"),      #Env
+Eta3_CS <-list(list(X = ZE,model="BRR"),      #Env
            list(K = NIR_MP_heterosis.ZN1_20CS, model="RKHS"),    #NIR1
            list(K = mid_parent_heterosis_ZNZE1.CS, model="RKHS"))  #NIR1 x Env
 
 ##### first derivative of high_parent heterosis NIR
-Eta4<-list(list(X = ZE,model = "BRR"),      #Env
+Eta4_CS <-list(list(X = ZE,model = "BRR"),      #Env
            list(K = NIR_HP_heterosis.ZN1_20CS, model = "RKHS"),    #NIR1
            list(K = high_parent_heterosis_ZNZE1.CS, model = "RKHS")) #NIR1 x Env
 
 
-#### first derivative of high parent NIR
-Eta5<-list(list(X = ZE,model = "BRR"),      #Env
-           list(K = high_parent_ZNZE1.CS, model = "RKHS"),    #NIR1
-           list(K = NIR_HP_ZN1_20CS, model = "RKHS")) #NIR1 x Env
-
-
 ##### first derivative of mid_parent + high-parent heterosis NIR
-Eta6<-list(list(X = ZE,model="BRR"),      #Env
+Eta5_CS <-list(list(X = ZE,model="BRR"),      #Env
            list(K = NIR_MP_heterosis.ZN1_20CS, model="RKHS"),    #NIR1
            list(K = mid_parent_heterosis_ZNZE1.CS, model="RKHS"),
            list(K = NIR_HP_heterosis.ZN1_20CS, model="RKHS"),    #NIR1
@@ -412,7 +405,7 @@ Eta6<-list(list(X = ZE,model="BRR"),      #Env
 
 
 ##### first derivative of mid_parent NIR + genomic
-Eta7 <- list(list(X = ZE, model = "BRR"),     # Env
+Eta6_CS <- list(list(X = ZE, model = "BRR"),     # Env
              list(K = K1star, model = "RKHS"), # Female
              list(K = K2star, model = "RKHS"), # male
              list(K = K3star, model = "RKHS"), #female xmale 
@@ -425,93 +418,62 @@ Eta7 <- list(list(X = ZE, model = "BRR"),     # Env
 
 ####Use 20MA
 
+# Genomic model
+Eta1_LY <- list(list(X = ZE, model = "BRR"),     # Env
+                list(K = K1star, model = "RKHS"), # Female
+                list(K = K2star, model = "RKHS"), # male
+                list(K = K3star, model = "RKHS"), # Femalexmale
+                list(K = K4, model = "RKHS"), # Female x environment
+                list(K = K5, model = "RKHS"), # male x environemnt
+                list(K = K6, model = "RKHS")) #female x male x environment
+
+
 ##### first derivative of mid_parent NIR
-Eta8<-list(list(X = ZE, model = "BRR"),      #Env
+Eta2_LY <- list(list(X = ZE, model = "BRR"),      #Env
            list(K= NIR_mid_parent.ZN1_20MA, model = "RKHS"),    #NIR1
            list(K = mid_parent.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent heterosis NIR
-Eta9<-list(list(X = ZE,model="BRR"),      #Env
+Eta3_LY <- list(list(X = ZE,model="BRR"),      #Env
            list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
            list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"))  #NIR1 x Env
 
-##### first derivative of high_parent heterosis NIR
-Eta10<-list(list(X = ZE,model = "BRR"),      #Env
-            list(K = NIR_HP_heterosis.ZN1_20MA, model = "RKHS"),    #NIR1
-            list(K = high_parent_heterosis.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
-
-
 ##### first derivative of mid_parent + high-parent heterosis NIR
-Eta11<-list(list(X = ZE,model="BRR"),      #Env
-            list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
-            list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"),
-            list(K = NIR_HP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
-            list(K = high_parent_heterosis.ZNZE1.MA, model="RKHS")) #NIR1 x Env
+Eta4_LY <- list(list(X = ZE,model="BRR"),      #Env
+                list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
+                list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"),
+                list(K = NIR_HP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
+                list(K = high_parent_heterosis.ZNZE1.MA, model="RKHS")) #NIR1 x Env
 
 
 #### first derivative of high parent NIR
-Eta12<- list(list(X = ZE,model = "BRR"),      #Env
-             list(K = NIR_HP_ZN1_20MA, model = "RKHS"),    #NIR1
-             list(K = high_parent_ZNZE1.MA, model = "RKHS")) #NIR1 x Env
+Eta5_LY <- list(list(X = ZE,model = "BRR"),      #Env
+                list(K = NIR_HP_ZN1_20MA, model = "RKHS"),    #NIR1
+                list(K = high_parent_ZNZE1.MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent NIR + genomic 20MA
-Eta13 <- list(list(X = ZE, model = "BRR"),     # Env
-              list(K = K1star, model = "RKHS"), # Female
-              list(K = K2star, model = "RKHS"), # male
-              list(K = K3star, model = "RKHS"), #female xmale 
-              list(K = K4, model = "RKHS"), #female x env
-              list(K = K5, model = "RKHS"), #male x env
-              list(K = K6, model = "RKHS"), #female x male x env
-              list(K=NIR_mid_parent.ZN1_20MA, model="RKHS"),    #NIR1_mid_parent
-              list(K=mid_parent.ZNZE1.MA, model="RKHS")) #NIR x env
-
-
-## Just GCA with no SCA
-Eta14 <- list(list(X = ZE, model = "BRR"),     # Env
-              list(K = K1star, model = "RKHS"), # Female
-              list(K = K2star, model = "RKHS"), # male
-              list(K = K4, model = "RKHS"), # Female x environment
-              list(K = K5, model = "RKHS")) # male x environemnt
-
-
-###Missing for multi-trait models using DA and PH
+Eta6_LY <- list(list(X = ZE, model = "BRR"),     # Env
+                list(K = K1star, model = "RKHS"), # Female
+                list(K = K2star, model = "RKHS"), # male
+                list(K = K3star, model = "RKHS"), #female xmale 
+                list(K = K4, model = "RKHS"), #female x env
+                list(K = K5, model = "RKHS"), #male x env
+                list(K = K6, model = "RKHS"), #female x male x env
+                list(K=NIR_mid_parent.ZN1_20MA, model="RKHS"),    #NIR1_mid_parent
+                list(K=mid_parent.ZNZE1.MA, model="RKHS")) #NIR x env
 
 
 ### 6 different models 
 # MODEL 1: Genomic model
-# MODEL 2: Mid-parent model-20CS
-# MODEL 3: mid_parent heterosis NIR-20CS
-# MODEL 4: high_parent heterosis NIR-20CS
-# MODEL 5: mid_parent + high-parent heterosis NIR-20CS
-# MODEL 6: first derivative of mid_parent NIR + genomic-20CS
-# MODEL 7: Mid-parent model-20MA
-# MODEL 8: mid_parent heterosis NIR-20MA
-# MODEL 9: high_parent heterosis NIR-20MA
-# MODEL 10: mid-parent + high_parent heterosis NIR-20CS
-# MODEL 11: first derivative of mid_parent NIR + genomic-20MA
+# MODEL 2: Mid-parent model
+# MODEL 3: mid_parent heterosis
+# MODEL 4: high_parent heterosis
+# MODEL 5: mid_parent + high-parent heterosis
+# MODEL 6: first derivative of mid_parent NIR + genomic
 
-# tr=1
-#parents = read.delim("parents.txt")$"pedigree"
-
-
-# pheno_yield = pheno_combined[,1:5]
-# pheno_ph = pheno_combined[,c(1:4,6)]
-# pheno_da = pheno_combined[,c(1:4,7)]
-# colnames(pheno_yield)[5] = "blue"
-# colnames(pheno_ph)[5] = "blue"
-# colnames(pheno_da)[5] = "blue"
-# 
-# 
-# write.csv(pheno_yield, "pheno_yield.csv")
-# write.csv(pheno_da, "pheno_da.csv")
-# write.csv(pheno_ph, "pheno_ph.csv")
-
-
-# 70:30 partition testing
-
-Models <- list(Eta1, Eta2, Eta3, Eta4, Eta5, Eta6, Eta7, Eta8, Eta9, Eta10, Eta11, Eta12, Eta13, Eta14)
+Models <- list(Eta1_CS, Eta2_CS, Eta3_CS, Eta4_CS, Eta5_CS, Eta6_CS)
 traitnames <- c("yield", "da", "ph", "starch", "protein", "fat", "fiber", "ash")
 pheno_combined[1:10,1:10]
 
@@ -662,16 +624,181 @@ for (tr in 1:length(traitnames)) {
       CV2out <- plyr::ldply(CV2, data.frame)
       CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
       CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
-      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_20CS", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20CS_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20CS_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
     }
   }
 }
 
+### 20MA
+Models <- list(Eta1_LY, Eta2_LY, Eta3_LY, Eta4_LY, Eta5_LY, Eta6_LY)
+traitnames <- c("yield", "da", "ph", "starch", "protein", "fat", "fiber", "ash")
+pheno_combined[1:10,1:10]
 
 
+# tr=1
+set.seed(1234)
+for (tr in 1:length(traitnames)) {
+  
+  if (tr == 1) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==2) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==3) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==4) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==5) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==6) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else if (tr ==7) {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  } else {
+    pheno <- read.csv(file = paste("pheno_", traitnames[tr], ".csv", sep = ""))
+  }
+  
+  
+  # cross-validation #
+  parents = c(unique(pheno$female), unique(pheno$male))
+  hybrid = as.character(unique(pheno$pedigree))
+  Phenotype_data1 = pheno
+  
+  set.seed(123)
+  cycles = 10
+  CV1 = list()
+  CV2 = list()
+  CV3_20LY = list()
+  CV3_19TA = list()
+  CV4 = list()
+  
+  #MODEL =10; rep_num=1
+  for (MODEL in 1:length(Models)) {  
+    
+    for (rep_num in 1:5) {
+      set.seed(123)
+      CVa = sample(parents[1:89], 15, replace = FALSE)
+      train_geno <- setdiff(parents[1:89], CVa)
+      pheno$y = pheno$blue
+      
+      for (a in 1:15) {
+        pheno <- pheno %>% mutate(y = replace(y, female == CVa[a], NA))
+      }
+      
+      for (b in 1:15) {
+        pheno <- pheno %>% mutate(y = replace(y, male == CVa[b], NA))
+      }
+      
+      test_pheno <- subset(pheno, is.na(y))
+      test_geno = unique(test_pheno$pedigree) # 30% of hybrid were removed
+      train_geno = setdiff(hybrid, test_geno)
+      
+      # Preparing for CV1
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y<-NA
+      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
+      
+      y_t<-as.numeric(CV_Data_1_2$Y)
+      
+      fit<-BGLR(y=y_t,
+                ETA=Models[[MODEL]],
+                nIter=500,
+                burnIn=100, 
+                thin=10) #nIter=5000,burnIn=1000, thin =10
+      
+      CV_Data_1_2$yhat <- fit$yHat
+      
+      
+      # CV1 # untested genotypes in observed environment
+      df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
+      CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
+      
+      # Preparing for CV2
+      # CV2 simulates sparse testing where 30% of hybrids were sampled from each environments
+      
+      test_geno = sample(unique(pedigrees_list), round(length(unique(pedigrees_list))*0.3))
+      train_geno = setdiff(hybrid, test_geno)
+      
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y<-NA
+      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
+      
+      y_t1<-as.numeric(CV_Data_1_2$Y)
+      
+      fit1<-BGLR(y=y_t1,
+                 ETA=Models[[MODEL]],
+                 nIter=500,
+                 burnIn=100, 
+                 thin=10) #nIter=5000,burnIn=1000, thin =10
+      
+      CV_Data_1_2$yhat1 <- fit1$yHat
+      
+      df_test1 <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
+      CV2[[(rep_num)]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat1,use = "complete.obs")))
+      
+      # For CV3_20LY
+      # leave environments out #20LY
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y = CV_Data_1_2$blue
+      
+      CV_Data_1_2$Y[CV_Data_1_2$env == "20LY"] <- NA
+      
+      y_t2<-as.numeric(CV_Data_1_2$Y)
+      
+      fit2<-BGLR(y=y_t2,
+                 ETA=Models[[MODEL]],
+                 nIter=500,
+                 burnIn=100, 
+                 thin=10) #nIter=5000,burnIn=1000, thin =10
+      
+      CV_Data_1_2$yhat2 <- fit2$yHat
+      
+      df_test2 <- subset(CV_Data_1_2, env == "20LY")
+      CV3_20LY[[(rep_num)]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat2,use = "complete.obs")))
+      
+      # For CV3_19TA
+      # leave environments out #19TA
+      CV_Data_1_2<-Phenotype_data1
+      CV_Data_1_2$Y = CV_Data_1_2$blue
+      
+      CV_Data_1_2$Y[CV_Data_1_2$env == "19TA"] <- NA
+      
+      y_t3<-as.numeric(CV_Data_1_2$Y)
+      
+      fit3<-BGLR(y=y_t3,
+                 ETA=Models[[MODEL]],
+                 nIter=500,
+                 burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
+      
+      CV_Data_1_2$yhat3 <- fit3$yHat
+      
+      df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
+      CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
+    }
+    
+    #rep_num =1
+    if (rep_num == 5) {
+      CV1out <- plyr::ldply(CV1, data.frame)
+      CV2out <- plyr::ldply(CV2, data.frame)
+      CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
+      CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
+      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20LY_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20LY_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
+    }
+  }
+}
+
+# End of fitting models
+
+
+
+
+
+#################################
 
 # Plot results
 setwd("output/results_4_29/")
