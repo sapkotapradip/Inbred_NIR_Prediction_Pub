@@ -199,9 +199,9 @@ NIR_MP_heterosis_20CS_20CS = scale(savitzkyGolay(MP_heterosis_20CS_20CS, m=1, p=
 NIR_MP_heterosis_20MA_20CS = scale(savitzkyGolay(MP_heterosis_20MA_20CS, m=1, p=1, w=11))
 
 NIR_MP_heterosis.d1_20CS = rbind(NIR_MP_heterosis_19CS_20CS, #combine all
-                            NIR_MP_heterosis_19TA_20CS, 
-                            NIR_MP_heterosis_20CS_20CS, 
-                            NIR_MP_heterosis_20MA_20CS) 
+                                 NIR_MP_heterosis_19TA_20CS, 
+                                 NIR_MP_heterosis_20CS_20CS, 
+                                 NIR_MP_heterosis_20MA_20CS) 
 
 NIR_MP_heterosis.ZN1_20CS = tcrossprod(as.matrix(NIR_MP_heterosis.d1_20CS)/ncol(as.matrix(NIR_MP_heterosis.d1_20CS))) #phenomic relationship matrices
 dim(NIR_MP_heterosis.ZN1_20CS) #phenomic relationship matrices from NIR_mid_parent_heterosis
@@ -292,9 +292,9 @@ NIR_HP_heterosis_20CS_20CS = scale(savitzkyGolay(HP_heterosis_20CS_20CS, m=1, p=
 NIR_HP_heterosis_20MA_20CS = scale(savitzkyGolay(HP_heterosis_20MA_20CS, m=1, p=1, w=11))
 
 NIR_HP_heterosis.d1_20CS = rbind(NIR_HP_heterosis_19CS_20CS, 
-                            NIR_HP_heterosis_19TA_20CS, 
-                            NIR_HP_heterosis_20CS_20CS, 
-                            NIR_HP_heterosis_20MA_20CS) 
+                                 NIR_HP_heterosis_19TA_20CS, 
+                                 NIR_HP_heterosis_20CS_20CS, 
+                                 NIR_HP_heterosis_20MA_20CS) 
 
 NIR_HP_heterosis.ZN1_20CS = tcrossprod(as.matrix(NIR_HP_heterosis.d1_20CS)/ncol(as.matrix(NIR_HP_heterosis.d1_20CS))) #phenomic relationship matrices
 dim(NIR_HP_heterosis.ZN1_20CS) 
@@ -438,42 +438,42 @@ Eta9<-list(list(X = ZE,model="BRR"),      #Env
 
 ##### first derivative of high_parent heterosis NIR
 Eta10<-list(list(X = ZE,model = "BRR"),      #Env
-           list(K = NIR_HP_heterosis.ZN1_20MA, model = "RKHS"),    #NIR1
-           list(K = high_parent_heterosis.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
+            list(K = NIR_HP_heterosis.ZN1_20MA, model = "RKHS"),    #NIR1
+            list(K = high_parent_heterosis.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent + high-parent heterosis NIR
 Eta11<-list(list(X = ZE,model="BRR"),      #Env
-           list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
-           list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"),
-           list(K = NIR_HP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
-           list(K = high_parent_heterosis.ZNZE1.MA, model="RKHS")) #NIR1 x Env
+            list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
+            list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"),
+            list(K = NIR_HP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
+            list(K = high_parent_heterosis.ZNZE1.MA, model="RKHS")) #NIR1 x Env
 
 
 #### first derivative of high parent NIR
 Eta12<- list(list(X = ZE,model = "BRR"),      #Env
-           list(K = NIR_HP_ZN1_20MA, model = "RKHS"),    #NIR1
-           list(K = high_parent_ZNZE1.MA, model = "RKHS")) #NIR1 x Env
+             list(K = NIR_HP_ZN1_20MA, model = "RKHS"),    #NIR1
+             list(K = high_parent_ZNZE1.MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent NIR + genomic 20MA
 Eta13 <- list(list(X = ZE, model = "BRR"),     # Env
-             list(K = K1star, model = "RKHS"), # Female
-             list(K = K2star, model = "RKHS"), # male
-             list(K = K3star, model = "RKHS"), #female xmale 
-             list(K = K4, model = "RKHS"), #female x env
-             list(K = K5, model = "RKHS"), #male x env
-             list(K = K6, model = "RKHS"), #female x male x env
-             list(K=NIR_mid_parent.ZN1_20MA, model="RKHS"),    #NIR1_mid_parent
-             list(K=mid_parent.ZNZE1.MA, model="RKHS")) #NIR x env
+              list(K = K1star, model = "RKHS"), # Female
+              list(K = K2star, model = "RKHS"), # male
+              list(K = K3star, model = "RKHS"), #female xmale 
+              list(K = K4, model = "RKHS"), #female x env
+              list(K = K5, model = "RKHS"), #male x env
+              list(K = K6, model = "RKHS"), #female x male x env
+              list(K=NIR_mid_parent.ZN1_20MA, model="RKHS"),    #NIR1_mid_parent
+              list(K=mid_parent.ZNZE1.MA, model="RKHS")) #NIR x env
 
 
 ## Just GCA with no SCA
 Eta14 <- list(list(X = ZE, model = "BRR"),     # Env
-             list(K = K1star, model = "RKHS"), # Female
-             list(K = K2star, model = "RKHS"), # male
-             list(K = K4, model = "RKHS"), # Female x environment
-             list(K = K5, model = "RKHS")) # male x environemnt
+              list(K = K1star, model = "RKHS"), # Female
+              list(K = K2star, model = "RKHS"), # male
+              list(K = K4, model = "RKHS"), # Female x environment
+              list(K = K5, model = "RKHS")) # male x environemnt
 
 
 ###Missing for multi-trait models using DA and PH
@@ -800,7 +800,7 @@ for (row_F in rownames(F_20CS)) {
   for (row_M in rownames(M_20CS)) {
     # Compute the average for the current pair of rows
     avg <- (F_20CS[row_F, ] + M_20CS[row_M, ]) / 2
-
+    
     # Store the result in the list with a descriptive name
     averages[[paste(row_F, row_M, sep = "/")]] <- avg
   }
@@ -909,86 +909,86 @@ mpnames = c("20CSMP", "20MAMP")
 for (tr in 1:length(traitnames)) {
   for (mp in 1:length(mpnames)){
     
-  if (tr == 1) {
-    pheno <- read.csv(file = paste("pheno_", traitnames[tr], "_", mpnames[mp], ".csv", sep = ""))
-  } else if (tr ==2) {
-    pheno <- read.csv(file = paste("pheno_", traitnames[tr], "_", mpnames[mp], ".csv", sep = ""))
-  } else {
-    pheno <- read.csv(file = paste("pheno_", traitnames[tr],"_", mpnames[mp], ".csv", sep = ""))
-  }
-  
-  # cross-validation #
-  hybrid = as.character(unique(pheno$pedigree))
-  Phenotype_data1 = pheno
-  
-  cycles = 10
-  CV3 = list()
-  CV2 = list()
-  CV1 = list()
-  
-  
-  #MODEL =2; rep_num=1
-  for (MODEL in 1:length(Models)) {  
+    if (tr == 1) {
+      pheno <- read.csv(file = paste("pheno_", traitnames[tr], "_", mpnames[mp], ".csv", sep = ""))
+    } else if (tr ==2) {
+      pheno <- read.csv(file = paste("pheno_", traitnames[tr], "_", mpnames[mp], ".csv", sep = ""))
+    } else {
+      pheno <- read.csv(file = paste("pheno_", traitnames[tr],"_", mpnames[mp], ".csv", sep = ""))
+    }
     
-    for (rep_num in 1:5) {
-      test_geno <- sample(hybrid, round(0.3*length(hybrid)))  
-      train_geno <-setdiff(hybrid, test_geno)
+    # cross-validation #
+    hybrid = as.character(unique(pheno$pedigree))
+    Phenotype_data1 = pheno
+    
+    cycles = 10
+    CV3 = list()
+    CV2 = list()
+    CV1 = list()
+    
+    
+    #MODEL =2; rep_num=1
+    for (MODEL in 1:length(Models)) {  
       
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y<-NA
-      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
-      
-      y_t<-as.numeric(CV_Data_1_2$Y)
-      fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=500,burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
-      CV_Data_1_2$yhat <- fit$yHat
-      
-      
-      # CV1
-      df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
-      CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
-      
-      # multi_trait using yield, anthesis and height
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y<-NA
-      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno]
-      
-      y_t1 = as.matrix(CV_Data_1_2[,c(7,8,9,10)]) #all the traits
-      fit1<- Multitrait(y = y_t1, ETA = Models[[MODEL]], nIter = 500, burnIn = 100, thin = 10)
-      whichNA = fit1$missing_records[fit1$patterns[,4]]
-      pred = fit1$ETAHat[whichNA,] #predicted values
-      
-      df_test1 <- subset(pheno, pheno$pedigree %in% test_geno)
-      df_test1 = cbind(df_test1, pred[,4])
-      colnames(df_test1)[10] = "yhat1"
-      CV2[[rep_num]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat1, use = "complete.obs")))
-      
-      
-      # multi_trait using anthesis and height
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y<-NA
-      CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno]
-      
-      y_t2 = as.matrix(CV_Data_1_2[,c(8,9,10)]) # days to anthesis and plant height
-      fit2<- Multitrait(y = y_t2, ETA = Models[[MODEL]], nIter = 500, burnIn = 100, thin = 10)
-      whichNA = fit2$missing_records[fit2$patterns[,3]]
-      pred = fit2$ETAHat[whichNA,] #predicted values
-      
-      df_test2 <- subset(pheno, pheno$pedigree %in% test_geno)
-      df_test2 = cbind(df_test2, pred[,3])
-      colnames(df_test2)[10] = "yhat2"
-      CV3[[rep_num]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat2, use = "complete.obs")))
+      for (rep_num in 1:5) {
+        test_geno <- sample(hybrid, round(0.3*length(hybrid)))  
+        train_geno <-setdiff(hybrid, test_geno)
+        
+        CV_Data_1_2<-Phenotype_data1
+        CV_Data_1_2$Y<-NA
+        CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno] 
+        
+        y_t<-as.numeric(CV_Data_1_2$Y)
+        fit<-BGLR(y=y_t,ETA=Models[[MODEL]],nIter=500,burnIn=100, thin=10) #nIter=5000,burnIn=1000, thin =10
+        CV_Data_1_2$yhat <- fit$yHat
+        
+        
+        # CV1
+        df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
+        CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
+        
+        # multi_trait using yield, anthesis and height
+        CV_Data_1_2<-Phenotype_data1
+        CV_Data_1_2$Y<-NA
+        CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno]
+        
+        y_t1 = as.matrix(CV_Data_1_2[,c(7,8,9,10)]) #all the traits
+        fit1<- Multitrait(y = y_t1, ETA = Models[[MODEL]], nIter = 500, burnIn = 100, thin = 10)
+        whichNA = fit1$missing_records[fit1$patterns[,4]]
+        pred = fit1$ETAHat[whichNA,] #predicted values
+        
+        df_test1 <- subset(pheno, pheno$pedigree %in% test_geno)
+        df_test1 = cbind(df_test1, pred[,4])
+        colnames(df_test1)[10] = "yhat1"
+        CV2[[rep_num]] <- as.data.frame(df_test1 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat1, use = "complete.obs")))
+        
+        
+        # multi_trait using anthesis and height
+        CV_Data_1_2<-Phenotype_data1
+        CV_Data_1_2$Y<-NA
+        CV_Data_1_2$Y[CV_Data_1_2$pedigree%in%train_geno]<-CV_Data_1_2$blue[CV_Data_1_2$pedigree%in%train_geno]
+        
+        y_t2 = as.matrix(CV_Data_1_2[,c(8,9,10)]) # days to anthesis and plant height
+        fit2<- Multitrait(y = y_t2, ETA = Models[[MODEL]], nIter = 500, burnIn = 100, thin = 10)
+        whichNA = fit2$missing_records[fit2$patterns[,3]]
+        pred = fit2$ETAHat[whichNA,] #predicted values
+        
+        df_test2 <- subset(pheno, pheno$pedigree %in% test_geno)
+        df_test2 = cbind(df_test2, pred[,3])
+        colnames(df_test2)[10] = "yhat2"
+        CV3[[rep_num]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor = cor(blue, yhat2, use = "complete.obs")))
+      }
+      #rep_num =1
+      if (rep_num == 5) {
+        CV1out <- plyr::ldply(CV1, data.frame)
+        CV2out <- plyr::ldply(CV2, data.frame)
+        CV3out <- plyr::ldply(CV3, data.frame)
+        write.csv(CV1out, file = paste("ACC_singltrait_", traitnames[tr], "_", mpnames[mp], "_CV1_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+        write.csv(CV2out, file = paste("ACC_multitrait_", traitnames[tr], "_", mpnames[mp], "_CV2_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+        write.csv(CV3out, file = paste("ACC_multitrait_", traitnames[tr], "_", mpnames[mp], "_CV3_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
+        
+      }
     }
-    #rep_num =1
-    if (rep_num == 5) {
-      CV1out <- plyr::ldply(CV1, data.frame)
-      CV2out <- plyr::ldply(CV2, data.frame)
-      CV3out <- plyr::ldply(CV3, data.frame)
-      write.csv(CV1out, file = paste("ACC_singltrait_", traitnames[tr], "_", mpnames[mp], "_CV1_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
-      write.csv(CV2out, file = paste("ACC_multitrait_", traitnames[tr], "_", mpnames[mp], "_CV2_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out, file = paste("ACC_multitrait_", traitnames[tr], "_", mpnames[mp], "_CV3_", MODEL, "_", ".csv", sep=""), row.names = FALSE)
-      
-    }
-  }
   }
 }
 
@@ -1159,8 +1159,8 @@ df1$model <- factor(df1$model, levels =  c("G", "MP_20CS", "G + MP_20CS", "MPH_2
                                            "MP_20LY", "G + MP_20LY", "MPH_20LY", "HPH_20LY", "MPH + HPH_20LY"))
 
 df1$CV_scheme =  factor(df1$CV_scheme, levels =  c("single_trait",
-                                               "GY + PH",
-                                               "DA + PH"))
+                                                   "GY + PH",
+                                                   "DA + PH"))
 
 library(tidyr)
 library(ggplot2)
