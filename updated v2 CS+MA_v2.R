@@ -354,19 +354,19 @@ dim(NIR_HP_ZN1_20MA)
 
 # calculating NIR x E interaction for different models using Hadamard product
 # 20CS
-mid_parent.ZNZE1.CS           = NIR_mid_parent.ZN1_20CS * ZEZEt
-mid_parent_heterosis_ZNZE1.CS = NIR_MP_heterosis.ZN1_20CS * ZEZEt
-high_parent_heterosis_ZNZE1.CS          = NIR_HP_heterosis.ZN1_20CS * ZEZEt
-high_parent_ZNZE1.CS          = NIR_HP_ZN1_20CS * ZEZEt
+mid_parent.ZNZE1.CS             = NIR_mid_parent.ZN1_20CS * ZEZEt
+mid_parent_heterosis_ZNZE1.CS   = NIR_MP_heterosis.ZN1_20CS * ZEZEt
+high_parent_heterosis_ZNZE1.CS  = NIR_HP_heterosis.ZN1_20CS * ZEZEt
+high_parent_ZNZE1.CS            = NIR_HP_ZN1_20CS * ZEZEt
 
 
 # calculating NIR x E interaction for different models using Hadamard product
 #20MA
 
-mid_parent.ZNZE1.MA           = NIR_mid_parent.ZN1_20MA * ZEZEt
-mid_parent_heterosis_ZNZE1.MA = NIR_MP_heterosis.ZN1_20MA * ZEZEt
-high_parent_heterosis.ZNZE1.MA          = NIR_HP_heterosis.ZN1_20MA * ZEZEt
-high_parent_ZNZE1.MA          = NIR_HP_ZN1_20MA * ZEZEt
+mid_parent.ZNZE1.MA             = NIR_mid_parent.ZN1_20MA * ZEZEt
+mid_parent_heterosis_ZNZE1.MA   = NIR_MP_heterosis.ZN1_20MA * ZEZEt
+high_parent_heterosis.ZNZE1.MA  = NIR_HP_heterosis.ZN1_20MA * ZEZEt
+high_parent_ZNZE1.MA            = NIR_HP_ZN1_20MA * ZEZEt
 
 # Set ETAs predictors for models
 
@@ -438,7 +438,7 @@ Eta9<-list(list(X = ZE,model="BRR"),      #Env
 ##### first derivative of high_parent heterosis NIR
 Eta10<-list(list(X = ZE,model = "BRR"),      #Env
            list(K = NIR_HP_heterosis.ZN1_20MA, model = "RKHS"),    #NIR1
-           list(K = High_parent_heterosis_20MA, model = "RKHS")) #NIR1 x Env
+           list(K = high_parent_heterosis.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent + high-parent heterosis NIR
@@ -492,9 +492,6 @@ Eta14 <- list(list(X = ZE, model = "BRR"),     # Env
 # MODEL 11: first derivative of mid_parent NIR + genomic-20MA
 
 # tr=1
-Models <- list(Eta1, Eta2, Eta3, Eta4, Eta5, Eta6, Eta7, Eta8, Eta9, Eta10, Eta11, Eta12, Eta13, Eta14)
-traitnames <- c("yield", "da", "ph", "starch", "protein", "fat", "fiber", "ash")
-pheno_combined[1:10,1:10]
 #parents = read.delim("parents.txt")$"pedigree"
 
 
@@ -513,7 +510,12 @@ pheno_combined[1:10,1:10]
 
 # 70:30 partition testing
 
-# tr=3
+Models <- list(Eta1, Eta2, Eta3, Eta4, Eta5, Eta6, Eta7, Eta8, Eta9, Eta10, Eta11, Eta12, Eta13, Eta14)
+traitnames <- c("yield", "da", "ph", "starch", "protein", "fat", "fiber", "ash")
+pheno_combined[1:10,1:10]
+
+
+# tr=1
 set.seed(1234)
 for (tr in 1:length(traitnames)) {
   
@@ -549,7 +551,7 @@ for (tr in 1:length(traitnames)) {
   CV3_19TA = list()
   CV4 = list()
   
-  #MODEL =2; rep_num=1
+  #MODEL =10; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
     for (rep_num in 1:5) {
@@ -579,8 +581,8 @@ for (tr in 1:length(traitnames)) {
       
       fit<-BGLR(y=y_t,
                 ETA=Models[[MODEL]],
-                nIter=5000,
-                burnIn=1000, 
+                nIter=500,
+                burnIn=100, 
                 thin=10) #nIter=5000,burnIn=1000, thin =10
       
       CV_Data_1_2$yhat <- fit$yHat
@@ -593,18 +595,8 @@ for (tr in 1:length(traitnames)) {
       # Preparing for CV2
       # CV2 simulates sparse testing where 30% of hybrids were sampled from each environments
       
-      ne <- as.vector(table(pheno$env)) ## counting the number of observations
-      ne
-      
-      # CV_Data_1_2<-Phenotype_data1
-      # CV_Data_1_2$Y = CV_Data_1_2$blue
-      # 
-      # index = c(sample(1:364,round(0.30*364)), sample(365:543,round(0.30*179)), 
-      #           sample(544:907,round(0.30*364)), sample(908:1094,round(0.30*187)))
-      # 
-      # CV_Data_1_2$Y[index] <- NA
-      
-      test_geno = sample(hybrids, length(unique(pedigrees_list))*0.3)
+      test_geno = sample(unique(pedigrees_list), round(length(unique(pedigrees_list))*0.3))
+      train_geno = setdiff(hybrid, test_geno)
       
       CV_Data_1_2<-Phenotype_data1
       CV_Data_1_2$Y<-NA
@@ -661,27 +653,6 @@ for (tr in 1:length(traitnames)) {
       
       df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
       CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
-      
-      # For CV4 #remove 30% hybrids
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y = CV_Data_1_2$blue
-
-      sample()
-
-      y_t3<-as.numeric(CV_Data_1_2$Y)
-      
-      fit3<-BGLR(y=y_t3,
-                 ETA=Models[[MODEL]],
-                 nIter=500,
-                 burnIn=100, 
-                 thin=10) #nIter=5000,burnIn=1000, thin =10
-      
-      CV_Data_1_2$yhat3 <- fit3$yHat
-
-      df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
-      CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
-
-      
     }
     
     #rep_num =1
@@ -697,6 +668,9 @@ for (tr in 1:length(traitnames)) {
     }
   }
 }
+
+
+
 
 # Plot results
 setwd("output/results_4_29/")
