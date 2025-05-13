@@ -479,7 +479,7 @@ pheno_combined[1:10,1:10]
 
 
 # tr=1
-set.seed(1234)
+#set.seed(1234)
 for (tr in 1:length(traitnames)) {
   
   if (tr == 1) {
@@ -510,15 +510,15 @@ for (tr in 1:length(traitnames)) {
   cycles = 10
   CV1 = list()
   CV2 = list()
-  CV3_20LY = list()
-  CV3_19TA = list()
-  CV4 = list()
+  #CV3_20LY = list()
+  #CV3_19TA = list()
+  #CV4 = list()
   
-  #MODEL =10; rep_num=1
+  #MODEL =6; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
     for (rep_num in 1:5) {
-      set.seed(123)
+      #set.seed(123)
       CVa = sample(parents[1:89], 15, replace = FALSE)
       train_geno <- setdiff(parents[1:89], CVa)
       pheno$y = pheno$blue
@@ -550,7 +550,6 @@ for (tr in 1:length(traitnames)) {
       
       CV_Data_1_2$yhat <- fit$yHat
       
-      
       # CV1 # untested genotypes in observed environment
       df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
       CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
@@ -580,57 +579,59 @@ for (tr in 1:length(traitnames)) {
       
       # For CV3_20LY
       # leave environments out #20LY
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y = CV_Data_1_2$blue
-      
-      CV_Data_1_2$Y[CV_Data_1_2$env == "20LY"] <- NA
-      
-      y_t2<-as.numeric(CV_Data_1_2$Y)
-      
-      fit2<-BGLR(y=y_t2,
-                 ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, 
-                 thin=10) #nIter=5000,burnIn=1000, thin =10
-      
-      CV_Data_1_2$yhat2 <- fit2$yHat
-      
-      df_test2 <- subset(CV_Data_1_2, env == "20LY")
-      CV3_20LY[[(rep_num)]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat2,use = "complete.obs")))
-      
-      # For CV3_19TA
-      # leave environments out #19TA
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y = CV_Data_1_2$blue
-      
-      CV_Data_1_2$Y[CV_Data_1_2$env == "19TA"] <- NA
-      
-      y_t3<-as.numeric(CV_Data_1_2$Y)
-      
-      fit3<-BGLR(y=y_t3,
-                 ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
-      
-      CV_Data_1_2$yhat3 <- fit3$yHat
-      
-      df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
-      CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
+      # CV_Data_1_2<-Phenotype_data1
+      # CV_Data_1_2$Y = CV_Data_1_2$blue
+      # 
+      # CV_Data_1_2$Y[CV_Data_1_2$env == "20LY"] <- NA
+      # 
+      # y_t2<-as.numeric(CV_Data_1_2$Y)
+      # 
+      # fit2<-BGLR(y=y_t2,
+      #            ETA=Models[[MODEL]],
+      #            nIter=5000,
+      #            burnIn=1000, 
+      #            thin=10) #nIter=5000,burnIn=1000, thin =10
+      # 
+      # CV_Data_1_2$yhat2 <- fit2$yHat
+      # 
+      # df_test2 <- subset(CV_Data_1_2, env == "20LY")
+      # CV3_20LY[[(rep_num)]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat2,use = "complete.obs")))
+      # 
+      # # For CV3_19TA
+      # # leave environments out #19TA
+      # CV_Data_1_2<-Phenotype_data1
+      # CV_Data_1_2$Y = CV_Data_1_2$blue
+      # 
+      # CV_Data_1_2$Y[CV_Data_1_2$env == "19TA"] <- NA
+      # 
+      # y_t3<-as.numeric(CV_Data_1_2$Y)
+      # 
+      # fit3<-BGLR(y=y_t3,
+      #            ETA=Models[[MODEL]],
+      #            nIter=5000,
+      #            burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+      # 
+      # CV_Data_1_2$yhat3 <- fit3$yHat
+      # 
+      # df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
+      # CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
     }
     
     #rep_num =1
     if (rep_num == 5) {
       CV1out <- plyr::ldply(CV1, data.frame)
       CV2out <- plyr::ldply(CV2, data.frame)
-      CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
-      CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
+      #CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
+      #CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
       write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_20CS", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20CS_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20CS_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
+      #write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20CS_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      #write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20CS_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
     }
   }
 }
+
+# started on 2:14 PM 5/9
 
 ### 20MA
 Models <- list(Eta1_LY, Eta2_LY, Eta3_LY, Eta4_LY, Eta5_LY, Eta6_LY)
@@ -639,7 +640,7 @@ pheno_combined[1:10,1:10]
 
 
 # tr=1
-set.seed(1234)
+#set.seed(1234)
 for (tr in 1:length(traitnames)) {
   
   if (tr == 1) {
@@ -666,19 +667,19 @@ for (tr in 1:length(traitnames)) {
   hybrid = as.character(unique(pheno$pedigree))
   Phenotype_data1 = pheno
   
-  set.seed(123)
+  # set.seed(123)
   cycles = 10
   CV1 = list()
   CV2 = list()
-  CV3_20LY = list()
-  CV3_19TA = list()
-  CV4 = list()
-  
-  #MODEL =10; rep_num=1
+  # CV3_20LY = list()
+  # CV3_19TA = list()
+  # CV4 = list()
+  # 
+  #MODEL =1; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
     for (rep_num in 1:5) {
-      set.seed(123)
+      #set.seed(123)
       CVa = sample(parents[1:89], 15, replace = FALSE)
       train_geno <- setdiff(parents[1:89], CVa)
       pheno$y = pheno$blue
@@ -740,63 +741,59 @@ for (tr in 1:length(traitnames)) {
       
       # For CV3_20LY
       # leave environments out #20LY
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y = CV_Data_1_2$blue
+      # CV_Data_1_2<-Phenotype_data1
+      # CV_Data_1_2$Y = CV_Data_1_2$blue
       
-      CV_Data_1_2$Y[CV_Data_1_2$env == "20LY"] <- NA
+      # CV_Data_1_2$Y[CV_Data_1_2$env == "20LY"] <- NA
       
-      y_t2<-as.numeric(CV_Data_1_2$Y)
+      # y_t2<-as.numeric(CV_Data_1_2$Y)
       
-      fit2<-BGLR(y=y_t2,
-                 ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, 
-                 thin=10) #nIter=5000,burnIn=1000, thin =10
-      
-      CV_Data_1_2$yhat2 <- fit2$yHat
-      
-      df_test2 <- subset(CV_Data_1_2, env == "20LY")
-      CV3_20LY[[(rep_num)]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat2,use = "complete.obs")))
-      
+      # fit2<-BGLR(y=y_t2,
+      #            ETA=Models[[MODEL]],
+      #            nIter=5000,
+      #            burnIn=1000, 
+      #            thin=10) #nIter=5000,burnIn=1000, thin =10
+      # 
+      # CV_Data_1_2$yhat2 <- fit2$yHat
+      # 
+      # df_test2 <- subset(CV_Data_1_2, env == "20LY")
+      # CV3_20LY[[(rep_num)]] <- as.data.frame(df_test2 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat2,use = "complete.obs")))
+      # 
       # For CV3_19TA
       # leave environments out #19TA
-      CV_Data_1_2<-Phenotype_data1
-      CV_Data_1_2$Y = CV_Data_1_2$blue
-      
-      CV_Data_1_2$Y[CV_Data_1_2$env == "19TA"] <- NA
-      
-      y_t3<-as.numeric(CV_Data_1_2$Y)
-      
-      fit3<-BGLR(y=y_t3,
-                 ETA=Models[[MODEL]],
-                 nIter=5000,
-                 burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
-      
-      CV_Data_1_2$yhat3 <- fit3$yHat
-      
-      df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
-      CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
+    #   CV_Data_1_2<-Phenotype_data1
+    #   CV_Data_1_2$Y = CV_Data_1_2$blue
+    #   
+    #   CV_Data_1_2$Y[CV_Data_1_2$env == "19TA"] <- NA
+    #   
+    #   y_t3<-as.numeric(CV_Data_1_2$Y)
+    #   
+    #   fit3<-BGLR(y=y_t3,
+    #              ETA=Models[[MODEL]],
+    #              nIter=5000,
+    #              burnIn=1000, thin=10) #nIter=5000,burnIn=1000, thin =10
+    #   
+    #   CV_Data_1_2$yhat3 <- fit3$yHat
+    #   
+    #   df_test3 <- subset(CV_Data_1_2, CV_Data_1_2$env == "19TA")
+    #   CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
     }
-    
+
     #rep_num =1
     if (rep_num == 5) {
       CV1out <- plyr::ldply(CV1, data.frame)
       CV2out <- plyr::ldply(CV2, data.frame)
-      CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
-      CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
+      #CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
+      #CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
       write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
       write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20LY_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20LY_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
+      #write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20LY_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
+      #write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20LY_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
     }
   }
 }
 
 # End of fitting models
-
-
-
-
 
 #################################
 
