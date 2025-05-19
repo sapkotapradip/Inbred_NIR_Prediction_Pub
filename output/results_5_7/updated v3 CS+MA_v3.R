@@ -475,6 +475,9 @@ Eta6_LY <- list(list(X = ZE, model = "BRR"),     # Env
 
 Models <- list(Eta1_CS, Eta2_CS, Eta3_CS, Eta4_CS, Eta5_CS, Eta6_CS)
 traitnames <- c("yield", "da", "ph", "starch", "protein", "fat", "fiber", "ash")
+traitnames <- c("fiber", "ash")
+
+
 pheno_combined[1:10,1:10]
 
 
@@ -631,7 +634,7 @@ for (tr in 1:length(traitnames)) {
   }
 }
 
-# started on 2:14 PM 5/9
+# started on 2:14 PM 5/12
 
 ### 20MA
 Models <- list(Eta1_LY, Eta2_LY, Eta3_LY, Eta4_LY, Eta5_LY, Eta6_LY)
@@ -798,89 +801,76 @@ for (tr in 1:length(traitnames)) {
 #################################
 
 # Plot results
-setwd("output/results_4_29/")
+setwd("output/results_5_19_manuscript/")
 ###lets plot
 library(plyr)
 library(readr)
 library(dplyr)
 library(stringr)
 
-list_csv_files <- list.files("../results_4_29/")
+list_csv_files <- list.files("../results_5_19_manuscript/")
 df2 <- readr::read_csv(list_csv_files, id = "file_name") %>% as.data.frame()
 df2
-write.csv(df2, "Pred.ability_11models_3cv_5rep.csv")
-df2 = read.csv("Pred.ability_11models_3cv_5rep.csv")
+write.csv(df2, "Pred.ability_11models_2cv_5rep.csv")
+df2 = read.csv("Pred.ability_6models_2cv_5rep.csv")
 
-df1 = df2 %>%
-  mutate(split_file_name = str_split(file_name, "_", simplify = TRUE)) %>%
-  mutate(trait = split_file_name[, 2],
-         CV = split_file_name[, 3],
-         model = split_file_name[, 3],
-         ".csv") 
-
-df1 =
-  df1  %>%
-  mutate(
-    model = case_when(
-      model == "1.csv" ~ "G",
-      model == "2.csv" ~ "MP",
-      model == "3.csv" ~ "MPH",
-      model == "4.csv" ~ "HPH",
-      model == "5.csv" ~ "MPH + HPH",
-      model == "6.csv" ~ "G + MP",
-      TRUE~model),
-    trait = case_when(
-      trait == "yield" ~ "Grain Yield",
-      trait == "ph" ~ "Plant Height",
-      trait == "da" ~ "Days to Anthesis",
-      TRUE~trait),
-    CV_scheme = case_when(
-      CV_scheme == "CV1" ~ "single_trait",
-      CV_scheme == "CV2" ~ "GY + PH",
-      CV_scheme == "CV3" ~ "DA + PH"
-    )
-  )
-
-df1 = df1[,c(3,4,6,7)]
-
-
-df1 <- as.data.frame(df2 %>%  dplyr::group_by(traits,Model,CV) %>% 
+df1 <- as.data.frame(df2 %>%  dplyr::group_by(traits,model,CV,grains) %>% 
                        dplyr::summarise(M = mean(cor, na.rm=TRUE),
                                         SD = sd(cor, na.rm=TRUE)))
-#df1 = read.csv("df1.csv")
-df1$traits <- factor(df1$traits, levels =  c("yield", "ph", "da"))
-df1$Model <- factor(df1$Model, levels =  c("M1", "M2", "M3", "M4", "M5", "M6",
-                                           "M7", "M8", "M9", "M10", "M11"))
-df1$CV <- factor(df1$CV, levels =  c("CV1", "CV2", "CV3"))
-
 
 library(tidyr)
 library(ggplot2)
 
+df1_CV1 = df1[df1$CV == "CV1",]
+df1_CV2 = df1[df1$CV == "CV2",]
+
+df1_CV2 =
+  df1_CV2  %>%
+  mutate(
+    traits = case_when(
+      traits == "ash" ~ "Ash",
+      traits == "da" ~ "Days to Anthesis",
+      traits == "fat" ~ "Fat",
+      traits == "fiber" ~ "Fiber",
+      traits == "ph" ~ "Plant Height",
+      traits == "protein" ~ "Protein",
+      traits == "starch" ~ "Starch",
+      traits == "yield" ~ "Grain Yield",
+      TRUE~traits)
+  )
+
+df1_CV2$traits <- factor(df1_CV2$traits, levels =  c("Grain Yield", 
+                                                     "Plant Height", 
+                                                     "Days to Anthesis", 
+                                                     "Starch", 
+                                                     "Protein", 
+                                                     "Fat", 
+                                                     "Fiber", 
+                                                     "Ash"))
 
 
-p = ggplot(df1, aes(CV, y=M, fill=Model)) +
+p = ggplot(df1_CV2, aes(model, y=M, fill=model)) +
   geom_bar(stat="identity", position=position_dodge())+
-  geom_text(aes(label=round(M,2)  ), hjust=3, color="white",
-            position = position_dodge(0.9), angle = 90,size=3.5)+
-  geom_errorbar(aes(ymin=M, ymax=M+SD), width=.2,
+  geom_text(aes(label=round(M,2), y = M + 0.3), color="black",
+            position = position_dodge(0.9), angle = 90,size=3, vjust = 0.4)+
+  geom_errorbar(aes(ymin=M, ymax=M+(SD/2)), width=.2,
                 position=position_dodge(.9))+
   theme_bw()+
-  facet_grid(~traits)+
+  facet_grid(~traits~grains)+
   scale_y_continuous("Prediction ability")+
-  xlab("Cross Validation Schemes") +
+  xlab("Prediction Models") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
   
   
   theme(
     # LABELS APPEARANCE
     plot.title = element_text(size=5, face= "bold", colour= "black" ),
-    axis.title.x = element_text(size=12, face="bold", colour = "black"),    
-    axis.title.y = element_text(size=12, face="bold", colour = "black"),    
-    axis.text.x = element_text(size=7, face="bold", colour = "black"), 
+    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
     # axis.text.y = element_text(size=22,  colour = "black"), # unbold
-    axis.text.y = element_text(size=7, face="bold", colour = "black"), # bold
-    strip.text.x = element_text(size = 8, face="bold", colour = "black" ),
+    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 13, face="bold", colour = "black" ),
     strip.text.y = element_text(size = 8, face="bold", colour = "black"),
     axis.line.x = element_line(color="black", size = 0.5),
     axis.line.y = element_line(color="black", size = 0.5),
@@ -889,9 +879,84 @@ p = ggplot(df1, aes(CV, y=M, fill=Model)) +
     #axis.text.x.bottom = element_blank()
   )
 
-jpeg("Pred.ability.jpeg",width = 9,height =4,units = "in", res=600)
+p
+
+jpeg("Pred.ability_20CS.jpeg",width = 12,height =10,units = "in", res=600)
 p
 dev.off()
+
+
+# CV2
+
+df1_CV2 =
+  df1_CV2  %>%
+  mutate(
+    traits = case_when(
+      traits == "ash" ~ "Ash",
+      traits == "da" ~ "Days to Anthesis",
+      traits == "fat" ~ "Fat",
+      traits == "fiber" ~ "Fiber",
+      traits == "ph" ~ "Plant Height",
+      traits == "protein" ~ "Protein",
+      traits == "starch" ~ "Starch",
+      traits == "yield" ~ "Grain Yield",
+      TRUE~traits)
+  )
+
+df1_CV2$traits <- factor(df1_CV2$traits, levels =  c("Grain Yield", 
+                                                     "Plant Height", 
+                                                     "Days to Anthesis", 
+                                                     "Starch", 
+                                                     "Protein", 
+                                                     "Fat", 
+                                                     "Fiber", 
+                                                     "Ash"))
+
+
+p = ggplot(df1_CV2, aes(model, y=M, fill=model)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=round(M,2), y = M + 0.3), color="black",
+            position = position_dodge(0.9), angle = 90,size=3, vjust = 0.4)+
+  geom_errorbar(aes(ymin=M, ymax=M+(SD/2)), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~traits~grains)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Prediction Models") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 13, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 8, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
+
+p
+
+jpeg("Pred.ability_CV2.jpeg",width = 12,height =10,units = "in", res=600)
+p
+dev.off()
+
+
+
+
+
+
+
+
+
 
 ####################################################################################################
 
