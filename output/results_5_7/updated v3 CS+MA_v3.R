@@ -25,7 +25,7 @@ ne <- as.vector(table(pheno_combined$env)) ## counting the number of observation
 ne
 
 #### loading marker data 
-T92I012 <- read.delim(file = "T92I012.txt", header = TRUE, sep = "\t", dec = ".")
+T92I012 <- read.table(file = "T92I012_clean.txt", header = TRUE)
 parents  = read.delim(file = "parents.txt", header = TRUE, sep = "\t", dec = ".")$pedigree
 
 geno = T92I012 %>% filter(
