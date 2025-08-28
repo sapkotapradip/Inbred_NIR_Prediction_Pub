@@ -1,4 +1,5 @@
 # calculation of heterosis
+setwd("../Inbred_NIR_Prediction_Pub/")
 
 pheno_yield_CS = read.csv("pheno_yield_20CSMP.csv")
 pheno_da_CS = read.csv("pheno_da_20CSMP.csv")
@@ -387,7 +388,53 @@ a
 dev.off()
 
 
-dim(data)
-data_CS = subset(data, env == "20LY")
-which.min(data_CS$cor)
-data_CS[1426,]
+### combined correlation
+library(reshape)
+library(dplyr)
+library(tidyr)
+combined_cor = read.csv("combined_cor.csv", check.names = "FALSE")
+combined_cor = combined_cor[,-c(1,4,9)]
+
+combined_cor = combined_cor[,-1]
+
+combined_cor2 <- combined_cor %>%
+  pivot_longer(
+    cols = -wavelength,      # melt everything except wavelength
+    names_to = "comparison", # new column for old column names
+    values_to = "value"      # new column for values
+  )
+
+combined_cor2 = as.data.frame(combined_cor2)
+combined_cor2$comparison <- factor(combined_cor2$comparison, levels =  c("19CS_20CS", "19TA_20CS", "20LY_20CS", "20CS_20CS", 
+                                                                         "19CS_20LY", "19TA_20LY", "20CS_20LY", "20LY_20LY"))
+
+
+rownames(combined_cor) <- NULL
+
+library(ggplot2)
+
+p = ggplot(combined_cor2, aes(x=wavelength, y=value))+
+  geom_line()+
+  scale_y_continuous("Correlation of Mid-parent Reflectance with Hybrid Reflectance")+
+  scale_x_continuous(bquote("NIRS Bands"~(nm)), guide = guide_axis(n.dodge=1))+
+  theme_bw()+
+  facet_wrap(~comparison, ncol = 4) +   # <-- 3 columns, rest wrap to next row
+  guides(color = TRUE)+
+  theme(
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=15, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=15, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    axis.text.y = element_text(size=8, face="bold", colour = "black"), 
+    strip.text.x = element_text(size = 10, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 15, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4)
+  )
+
+p
+
+jpeg("corbands_mid_parents_hybrids1.jpeg",width = 12,height =8,units = "in", res=600)
+p
+dev.off()
