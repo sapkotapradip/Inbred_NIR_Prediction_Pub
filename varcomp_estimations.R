@@ -216,13 +216,10 @@ NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
 model <- lmer(ph ~ (1|female) + 
                 (1|male) + 
                 (1|pedigree) + 
-                (1|rep/env) +
-                (1|env) + 
-                (1|ra/env) + 
-                (1|ro/env)+ 
+                (1|env/rep) +
                 (1|female:env) + 
                 (1|male:env) + 
-                (1|female:male:env), 
+                (1|female:male:env),
               pheno)
 
 # 2 reps in 19CS
@@ -243,39 +240,28 @@ SCA
 ### calculation of variance heritability and CV component
 varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
 variances = as.data.frame(varcomp)[,c(1,4,5)]
-hybridvar = variances[2,2] + variances[8,2] + variances[9,2]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
 hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
-errorvar = variances[14,2]
+errorvar = variances[9,2]
 
-addvar = variances[8,2] + variances[9,2]
+addvar = variances[5,2] + variances[6,2]
 
 cve = sqrt(errorvar)*100/mean(na.omit(pheno$ph))
 
-repeatability = hybridvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #BSH
-NSH = addvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #NSH
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
 NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
 NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
 
-print(cve)
-print(repeatability)
-print(NSH)
-print(NSHf)
-print(NSHm)
 
-
-
-
-##### days to anthesis
+##### anthesis
 model <- lmer(dy ~ (1|female) + 
                 (1|male) + 
                 (1|pedigree) + 
-                (1|rep/env) +
-                (1|env) + 
-                (1|ra/env) + 
-                (1|ro/env)+ 
+                (1|env/rep) +
                 (1|female:env) + 
                 (1|male:env) + 
-                (1|female:male:env), 
+                (1|female:male:env),
               pheno)
 
 # 2 reps in 19CS
@@ -292,6 +278,26 @@ GXE = ranef(model)$"female:male:env"
 GCAmales
 GCAfemales
 SCA
+
+### calculation of variance heritability and CV component
+varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
+variances = as.data.frame(varcomp)[,c(1,4,5)]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
+hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
+errorvar = variances[9,2]
+
+addvar = variances[5,2] + variances[6,2]
+
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$ph))
+
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
+NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+
+
+
+
 
 ### calculation of variance heritability and CV component
 varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
