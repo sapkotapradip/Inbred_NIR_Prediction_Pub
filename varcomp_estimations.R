@@ -132,19 +132,24 @@ dev.off()
 
 
 ################# Variance component estimations for hybrids ##############
+library(lme4)
+library(lmerTest)
 hybrids = unique(pheno_combined$pedigree)
 pheno = read.csv("raw_phenotypic_data.csv")
-unique(pheno$Pedigree)
-names(pheno) = tolower(names(pheno))
+colnames(pheno) = tolower(names(pheno))
+hyb = read.csv("blues_combined.csv")
+ped = unique(hyb$pedigree)
 
 pheno = pheno %>% filter(
-  pedigree %in% hybrids)
+  pedigree %in% ped)
+
+write.csv(pheno, "raw_pheno_366.csv")
 
 ########### Variance components estimations for grain yield days to anthesis and plant height##
 library(lme4)
 library(lmerTest)
 
-pheno = read.csv("raw_phenotypic_data.csv")
+pheno = read.csv("raw_pheno_366.csv")
 head(pheno)
 names(pheno) = tolower(names(pheno))
 
@@ -164,9 +169,13 @@ pheno$ro <- as.factor(pheno$ro)
 
 
 ##### grain yield
-model <- lmer(gy ~ (1|female) + (1|male) + (1|pedigree) + (1|rep/env) +
-                (1|env) + (1|ra/env) + (1|ro/env)+ (1|female:env) + 
-                (1|male:env) + (1|female:male:env), 
+model <- lmer(gy ~ (1|female) + 
+                (1|male) + 
+                (1|pedigree) + 
+                (1|env/rep) +
+                (1|female:env) + 
+                (1|male:env) + 
+                (1|female:male:env),
               pheno)
 
 # 2 reps in 19CS
@@ -503,6 +512,242 @@ pheno = read.csv("../Inbred_NIR_Prediction/a.csv")
 
 ######################## end of this copied code##################################
 
+############# Distribution of BLUES
+pheno = read.csv("blues_combined.csv")
+pheno_ph = read.csv("pheno_ph.csv")
+pheno_da = read.csv("pheno_da.csv")
+pheno_starch = read.csv("pheno_starch.csv")
+pheno_protein = read.csv("pheno_protein.csv")
+pheno_fat = read.csv("pheno_fat.csv")
+pheno_fiber = read.csv("pheno_fiber.csv")
+pheno_ash = read.csv("pheno_ash.csv")
+
+library(ggplot2)
+
+a = ggplot(pheno, aes(env, gy, fill = env)) +
+  geom_boxplot(colour = "blue")+
+  labs(y = "Grain Yield (t/ha)", x= "")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1))
+  )
+
+a = a + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+b = ggplot(pheno_ph, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "purple")+
+  labs(y = "Plant Height (cm)", x= "")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1))
+  )
+
+b = b + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+c <- ggplot(pheno_da, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "black")+
+  labs(y = "Days to Anthesis")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1)))
+
+
+c = c + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+
+d <- ggplot(pheno_starch, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "dark red")+
+  labs(y = "% Starch Content")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1)))
+
+
+d = d + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+
+e <- ggplot(pheno_protein, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "dark cyan")+
+  labs(y = "% Protein Content", x= "")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1))
+  )
+
+e = e + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+
+f <- ggplot(pheno_fat, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "dark green")+
+  labs(y = "% Fat Content", x= "")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1)))
+
+
+f = f + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+
+g <- ggplot(pheno_fiber, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "brown")+
+  labs(y = "% Fiber Content", x= "")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1)))
+
+
+g = g + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+
+
+h <- ggplot(pheno_ash, aes(env, blue, fill = env)) +
+  geom_boxplot(colour = "darkviolet")+
+  labs(y = "% Ash Content", x= "")+
+  #scale_y_continuous(limits = c(0.2,1))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=10, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=10, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=10, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=10, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 5, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 5, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.4),
+    axis.line.y = element_line(color="black", size = 0.4),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.4),
+    axis.text.x.bottom = element_blank(),
+    legend.text = element_text(size = rel(1)))
+
+
+h = h + guides(fill=guide_legend(title = "Environments"),
+               theme = theme(legend.title = element_text(size =rel(10))))
+library(ggpubr)
+merge1 = ggarrange(a,b,c,d,
+                   e,f,g, h,
+                   ncol = 2, nrow = 4,
+                   common.legend = TRUE,
+                   legend = c("bottom"))
+
+
+merge1
+
+jpeg("pheno_distribution_all_.jpeg",width = 9,height =8,units = "in", res=600)
+merge1
+dev.off()
 
 
 
