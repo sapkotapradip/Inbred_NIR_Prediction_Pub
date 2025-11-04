@@ -166,10 +166,12 @@ pheno$female <- as.factor(pheno$female)
 pheno$male <- as.factor(pheno$male)
 pheno$ra <- as.factor(pheno$ra)
 pheno$ro <- as.factor(pheno$ro)
-
+pheno$dy <- as.numeric(pheno$dy)
+pheno$ph <- as.numeric(pheno$ph)
+pheno$gy_t_ha <- as.numeric(pheno$gy_t_ha)
 
 ##### grain yield
-model <- lmer(gy ~ (1|female) + 
+model <- lmer(gy_t_ha ~ (1|female) + 
                 (1|male) + 
                 (1|pedigree) + 
                 (1|env/rep) +
@@ -196,16 +198,16 @@ SCA
 ### calculation of variance heritability and CV component
 varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
 variances = as.data.frame(varcomp)[,c(1,4,5)]
-hybridvar = variances[2,2] + variances[8,2] + variances[9,2]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
 hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
-errorvar = variances[14,2]
+errorvar = variances[9,2]
 
-addvar = variances[8,2] + variances[9,2]
+addvar = variances[5,2] + variances[6,2]
 
-cve = sqrt(errorvar)*100/mean(na.omit(pheno$gy))
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$gy_t_ha))
 
-repeatability = hybridvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #BSH
-NSH = addvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #NSH
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
 NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
 NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
 
