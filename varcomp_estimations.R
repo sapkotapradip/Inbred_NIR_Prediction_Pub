@@ -321,199 +321,208 @@ print(NSH)
 print(NSHf)
 print(NSHm)
 
-# Variance components estimations by ommitting range and row
-########### Variance components estimations for grain yield days to anthesis and plant height##
-library(lme4)
-library(lmerTest)
-
-pheno = read.csv("raw_phenotypic_data.csv")
-head(pheno)
-names(pheno) = tolower(names(pheno))
-
-
-## checking for NAs
-colSums(is.na(pheno))
-
-#### converting variables in factors
-
-pheno$pedigree <- as.factor(pheno$pedigree)
-pheno$env <- as.factor(pheno$env)
-pheno$rep <- as.factor(pheno$rep)
-pheno$female <- as.factor(pheno$female)
-pheno$male <- as.factor(pheno$male)
-pheno$ra <- as.factor(pheno$ra)
-pheno$ro <- as.factor(pheno$ro)
-
-
-##### grain yield
-
-model <- lmer(gy ~ (1|female)
-              + (1|male)
-              + (1|pedigree)
-              + (1|rep/env)
-              + (1|env) 
-              + (1|female:env) 
-              + (1|male:env) 
-              + (1|female:male:env),
-              pheno)
-
-# 2 reps in 19CS
-# 2 reps in 19TA
-# 2 reps in 20CS
-# 2 reps in 20LY
-
-ranova(model)
-summary(model)
-GCAmales <- ranef(model)$male
-GCAfemales <- ranef(model)$female
-SCA <- ranef(model)$"pedigree"
-GXE = ranef(model)$"female:male:env"
-GCAmales
-GCAfemales
-SCA
-
-### calculation of variance heritability and CV component
-varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
-variances = as.data.frame(varcomp)[,c(1,4,5)]
-hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
-hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
-errorvar = variances[10,2]
-
-addvar = variances[5,2] + variances[6,2]
-
-cve = sqrt(errorvar)*100/mean(na.omit(pheno$gy))
-
-repeatability = hybridvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #BSH
-NSH = addvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #NSH
-NSHf = variances[6,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
-NSHm = variances[5,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
-mean(na.omit(pheno$gy))
-
-# plot basis
-repeatability = hybridvar/(hybridvar+errorvar) #BSH
-NSH = addvar/(hybridvar+errorvar)#NSH
-NSHf = variances[6,2]/(hybridvar+errorvar)
-NSHm = variances[5,2]/(hybridvar+errorvar)
-mean(na.omit(pheno$gy))
-
-
-
-##### plant height
-model <- lmer(ph ~ (1|female)
-              + (1|male)
-              + (1|pedigree)
-              + (1|rep/env)
-              + (1|env) 
-              + (1|female:env) 
-              + (1|male:env) 
-              + (1|female:male:env),
-              pheno)
-
-# 2 reps in 19CS
-# 2 reps in 19TA
-# 2 reps in 20CS
-# 2 reps in 20LY
-
-ranova(model)
-summary(model)
-GCAmales <- ranef(model)$male
-GCAfemales <- ranef(model)$female
-SCA <- ranef(model)$"pedigree"
-GXE = ranef(model)$"female:male:env"
-GCAmales
-GCAfemales
-SCA
-
-### calculation of variance heritability and CV component
-varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
-variances = as.data.frame(varcomp)[,c(1,4,5)]
-hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
-hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
-errorvar = variances[10,2]
-
-addvar = variances[5,2] + variances[6,2]
-
-cve = sqrt(errorvar)*100/mean(na.omit(pheno$ph))
-
-repeatability = hybridvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #BSH
-NSH = addvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #NSH
-NSHf = variances[6,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
-NSHm = variances[5,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
-mean(na.omit(pheno$ph))
-
-print(cve)
-print(repeatability)
-print(NSH)
-print(NSHf)
-print(NSHm)
-
-#plot basis
-repeatability = hybridvar/(hybridvar+errorvar) #BSH
-NSH = addvar/(hybridvar+errorvar) #NSH
-NSHf = variances[6,2]/(hybridvar+errorvar)
-NSHm = variances[5,2]/(hybridvar+errorvar)
-
-
-##### da
-model <- lmer(dy ~ (1|female)
-              + (1|male)
-              + (1|pedigree)
-              + (1|rep/env)
-              + (1|env) 
-              + (1|female:env) 
-              + (1|male:env) 
-              + (1|female:male:env),
-              pheno)
-
-# 2 reps in 19CS
-# 2 reps in 19TA
-# 2 reps in 20CS
-# 2 reps in 20LY
-
-ranova(model)
-summary(model)
-GCAmales <- ranef(model)$male
-GCAfemales <- ranef(model)$female
-SCA <- ranef(model)$"pedigree"
-GXE = ranef(model)$"female:male:env"
-GCAmales
-GCAfemales
-SCA
-
-### calculation of variance heritability and CV component
-varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
-variances = as.data.frame(varcomp)[,c(1,4,5)]
-hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
-hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
-errorvar = variances[10,2]
-
-addvar = variances[5,2] + variances[6,2]
-
-cve = sqrt(errorvar)*100/mean(na.omit(pheno$dy))
-
-repeatability = hybridvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #BSH
-NSH = addvar/(hybridvar+(hybridenvvar/4)+errorvar/8) #NSH
-NSHf = variances[6,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
-NSHm = variances[5,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
-mean(na.omit(pheno$dy))
-
-# plot basis
-#plot basis
-repeatability = hybridvar/(hybridvar+errorvar) #BSH
-NSH = addvar/(hybridvar+errorvar) #NSH
-NSHf = variances[6,2]/(hybridvar+errorvar)
-NSHm = variances[5,2]/(hybridvar+errorvar)
-
-
-
-print(cve)
-print(repeatability)
-print(NSH)
-print(NSHf)
-print(NSHm)
-
 ## for grain composition trait
 pheno = read.csv("../Inbred_NIR_Prediction/a.csv")
+pheno = read.csv("../Inbred_NIR_Prediction/a.csv")
+
+hyb = read.csv("blues_combined.csv")
+ped = unique(hyb$pedigree)
+
+pheno = pheno %>% filter(
+  pedigree %in% ped)
+
+pheno = read.csv("../Inbred_NIR_Prediction/grain_composition_366hybrids.csv")
+pheno$env = as.factor(pheno$env)
+pheno$pedigree = as.factor(pheno$pedigree)
+pheno$female = as.factor(pheno$female)
+pheno$male = as.factor(pheno$male)
+pheno$scan = as.factor(pheno$scan)
+
+##### starch
+model <- lmer(starch ~ (1|female) + 
+                (1|male) + 
+                (1|pedigree) + 
+                (1|env/scan) +
+                (1|female:env) + 
+                (1|male:env) + 
+                (1|female:male:env),
+              pheno)
+
+
+ranova(model)
+summary(model)
+GCAmales <- ranef(model)$male
+GCAfemales <- ranef(model)$female
+SCA <- ranef(model)$"pedigree"
+GXE = ranef(model)$"female:male:env"
+GCAmales
+GCAfemales
+SCA
+
+### calculation of variance heritability and CV component
+varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
+variances = as.data.frame(varcomp)[,c(1,4,5)]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
+hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
+errorvar = variances[9,2]
+
+addvar = variances[5,2] + variances[6,2]
+
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$starch))
+
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
+NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+
+## protein
+model <- lmer(protein ~ (1|female) + 
+                (1|male) + 
+                (1|pedigree) + 
+                (1|env/scan) +
+                (1|female:env) + 
+                (1|male:env) + 
+                (1|female:male:env),
+              pheno)
+
+
+ranova(model)
+summary(model)
+GCAmales <- ranef(model)$male
+GCAfemales <- ranef(model)$female
+SCA <- ranef(model)$"pedigree"
+GXE = ranef(model)$"female:male:env"
+GCAmales
+GCAfemales
+SCA
+
+### calculation of variance heritability and CV component
+varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
+variances = as.data.frame(varcomp)[,c(1,4,5)]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
+hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
+errorvar = variances[9,2]
+
+addvar = variances[5,2] + variances[6,2]
+
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$protein))
+
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
+NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+
+
+## fat
+model <- lmer(fat ~ (1|female) + 
+                (1|male) + 
+                (1|pedigree) + 
+                (1|env/scan) +
+                (1|female:env) + 
+                (1|male:env) + 
+                (1|female:male:env),
+              pheno)
+
+
+ranova(model)
+summary(model)
+GCAmales <- ranef(model)$male
+GCAfemales <- ranef(model)$female
+SCA <- ranef(model)$"pedigree"
+GXE = ranef(model)$"female:male:env"
+GCAmales
+GCAfemales
+SCA
+
+### calculation of variance heritability and CV component
+varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
+variances = as.data.frame(varcomp)[,c(1,4,5)]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
+hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
+errorvar = variances[9,2]
+
+addvar = variances[5,2] + variances[6,2]
+
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$fat))
+
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
+NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+
+## fiber
+model <- lmer(fiber ~ (1|female) + 
+                (1|male) + 
+                (1|pedigree) + 
+                (1|env/scan) +
+                (1|female:env) + 
+                (1|male:env) + 
+                (1|female:male:env),
+              pheno)
+
+
+ranova(model)
+summary(model)
+GCAmales <- ranef(model)$male
+GCAfemales <- ranef(model)$female
+SCA <- ranef(model)$"pedigree"
+GXE = ranef(model)$"female:male:env"
+GCAmales
+GCAfemales
+SCA
+
+### calculation of variance heritability and CV component
+varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
+variances = as.data.frame(varcomp)[,c(1,4,5)]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
+hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
+errorvar = variances[9,2]
+
+addvar = variances[5,2] + variances[6,2]
+
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$fiber))
+
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
+NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+
+## ash
+model <- lmer(ash ~ (1|female) + 
+                (1|male) + 
+                (1|pedigree) + 
+                (1|env/scan) +
+                (1|female:env) + 
+                (1|male:env) + 
+                (1|female:male:env),
+              pheno)
+
+
+ranova(model)
+summary(model)
+GCAmales <- ranef(model)$male
+GCAfemales <- ranef(model)$female
+SCA <- ranef(model)$"pedigree"
+GXE = ranef(model)$"female:male:env"
+GCAmales
+GCAfemales
+SCA
+
+### calculation of variance heritability and CV component
+varcomp <- print(VarCorr(model), com = c("Variance", "Std.Dev."))
+variances = as.data.frame(varcomp)[,c(1,4,5)]
+hybridvar = variances[2,2] + variances[5,2] + variances[6,2]
+hybridenvvar = variances[1,2] + variances[3,2] +variances[4,2]
+errorvar = variances[9,2]
+
+addvar = variances[5,2] + variances[6,2]
+
+cve = sqrt(errorvar)*100/mean(na.omit(pheno$ash))
+
+repeatability = hybridvar/(hybridvar+hybridenvvar+errorvar) #BSH
+NSH = addvar/(hybridvar+hybridenvvar+errorvar) #NSH
+NSHf = variances[9,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
+NSHm = variances[8,2]/(hybridvar+(hybridenvvar/4)+errorvar/8)
 
 
 
