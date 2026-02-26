@@ -90,7 +90,7 @@ fig1 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
        color = "Group") +
   theme(
     # LABELS APPEARANCE
-    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    plot.title = element_text(size=17, face= "bold", colour= "black" ),
     axis.title.x = element_text(size=17, face="bold", colour = "black"),    
     axis.title.y = element_text(size=17, face="bold", colour = "black"),    
     axis.text.x = element_text(size=12, face="bold", colour = "black"), 
@@ -102,6 +102,9 @@ fig1 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
     axis.line.y = element_line(color="black", size = 0.5),
     #panel.border = element_rect(colour = "black", fill=NA, size=0.5),
     #axis.text.x.bottom = element_blank()
+    legend.title = element_text(size = 14, face = "bold"),
+    legend.text  = element_text(size = 8),
+    legend.key.size = unit(1, "lines")
   )
 
 fig1 <- fig1 + guides(color = guide_legend(title = "Heterotic Groups"))
@@ -137,7 +140,7 @@ fig2 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
        color = "Group") +
   theme(
     # LABELS APPEARANCE
-    plot.title = element_text(size=10, face= "bold", colour= "black" ),
+    plot.title = element_text(size=17, face= "bold", colour= "black" ),
     axis.title.x = element_text(size=17, face="bold", colour = "black"),    
     axis.title.y = element_text(size=17, face="bold", colour = "black"),    
     axis.text.x = element_text(size=12, face="bold", colour = "black"), 
@@ -149,6 +152,9 @@ fig2 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
     axis.line.y = element_line(color="black", size = 0.5),
     #panel.border = element_rect(colour = "black", fill=NA, size=0.5),
     #axis.text.x.bottom = element_blank()
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text  = element_text(size = 14),
+    legend.key.size = unit(1.5, "lines")
   )
 
 fig2 <- fig2 + guides(color = guide_legend(title = "Environments"))
