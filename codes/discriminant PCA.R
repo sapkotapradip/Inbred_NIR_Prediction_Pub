@@ -1,4 +1,4 @@
-### From youtube session
+### Loading libraries
 library(readxl)
 library(MASS)
 library(caret)
@@ -7,59 +7,59 @@ library(dplyr)
 library(pROC)
 
 #### reading pheno data for inbreds
-parents_20CS = read.csv("blues_20CS_inbreds_spectra.csv", check.names = FALSE)
-parents_20MA = read.csv("blues_20MA_inbreds_spectra.csv", check.names = FALSE)
+parents_20CS = read.csv("data/blues_20CS_inbreds_spectra.csv", check.names = FALSE)
+parents_20LY = read.csv("data/blues_20MA_inbreds_spectra.csv", check.names = FALSE)
 
 # 20CS
 parents_20CS[1:10,1:10]
 dim(parents_20CS)
 
-group = c(rep("Seed Parents (A)",45), rep("Pollinator Parents (R)",44))
-sum(is.na(parents_20CS)) # need to omit or impute missing values
-
-lda.model = lda(group ~., data = parents_20CS[,-c(1:5)])
-
-# Predict LDA scores
-lda_scores <- predict(lda.model)$x
-lda_data <- data.frame(lda_scores, Group = group)
-
-# Print first few rows to check
-head(lda_data)
-
-print(dim(lda_scores))  # Check the dimensions of LDA output
-colnames(lda_scores)    # Print available column names
-
-lda.model$svd
-
-
-fig = ggplot(lda_data, aes(x = LD1, y = Group, color = Group)) +
-  geom_jitter(size = 4, alpha = 0.7, width = 0.2) +
-  theme_minimal() +
-  # labs(title = "",
-  #      x = x ,
-  #      y = y,
-  #      color = "Group") +
-  theme(
-    # LABELS APPEARANCE
-    plot.title = element_text(size=10, face= "bold", colour= "black" ),
-    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
-    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
-    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
-    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
-    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
-    strip.text.x = element_text(size = 13, face="bold", colour = "black" ),
-    strip.text.y = element_text(size = 13, face="bold", colour = "black"),
-    axis.line.x = element_line(color="black", size = 0.5),
-    axis.line.y = element_line(color="black", size = 0.5),
-    #panel.border = element_rect(colour = "black", fill=NA, size=0.5),
-    #axis.text.x.bottom = element_blank()
-  )
-
-fig <- fig + guides(color = guide_legend(title = "Heterotic Groups"))
+# group = c(rep("Seed Parents (A)",45), rep("Pollinator Parents (R)",44))
+# sum(is.na(parents_20CS)) # need to omit or impute missing values
+# 
+# lda.model = lda(group ~., data = parents_20CS[,-c(1:5)])
+# 
+# # Predict LDA scores
+# lda_scores <- predict(lda.model)$x
+# lda_data <- data.frame(lda_scores, Group = group)
+# 
+# # Print first few rows to check
+# head(lda_data)
+# 
+# print(dim(lda_scores))  # Check the dimensions of LDA output
+# colnames(lda_scores)    # Print available column names
+# 
+# lda.model$svd
+# 
+# 
+# fig = ggplot(lda_data, aes(x = LD1, y = Group, color = Group)) +
+#   geom_jitter(size = 4, alpha = 0.7, width = 0.2) +
+#   theme_minimal() +
+#   # labs(title = "",
+#   #      x = x ,
+#   #      y = y,
+#   #      color = "Group") +
+#   theme(
+#     # LABELS APPEARANCE
+#     plot.title = element_text(size=10, face= "bold", colour= "black" ),
+#     axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+#     axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+#     axis.text.x = element_text(size=12, face="bold", colour = "black"), 
+#     # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+#     axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+#     strip.text.x = element_text(size = 13, face="bold", colour = "black" ),
+#     strip.text.y = element_text(size = 13, face="bold", colour = "black"),
+#     axis.line.x = element_line(color="black", size = 0.5),
+#     axis.line.y = element_line(color="black", size = 0.5),
+#     #panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+#     #axis.text.x.bottom = element_blank()
+#   )
+# 
+# fig <- fig + guides(color = guide_legend(title = "Heterotic Groups"))
 
 
 # Combining two heterotic groups for two environments 
-parents_combined = rbind(parents_20CS,parents_20MA)
+parents_combined = rbind(parents_20CS,parents_20LY)
 group = c(c(rep("Seed Parents - CS",45), rep("Pollinator Parents - CS",44)),c(rep("Seed Parents - LY",45), rep("Pollinator Parents - LY",44)))
 
 lda.model = lda(group ~., data = parents_combined[,-c(1:5)])
@@ -88,6 +88,10 @@ fig1 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
        x = x ,
        y = y,
        color = "Group") +
+  scale_color_manual(values = c("Seed Parents - CS" =       "#009E73",
+                                "Pollinator Parents - CS" = "#CC79A7",
+                                "Seed Parents - LY" =       "#56B4E9",
+                                "Pollinator Parents - LY" = "#4B0082")) +
   theme(
     # LABELS APPEARANCE
     plot.title = element_text(size=17, face= "bold", colour= "black" ),
@@ -102,8 +106,8 @@ fig1 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
     axis.line.y = element_line(color="black", size = 0.5),
     #panel.border = element_rect(colour = "black", fill=NA, size=0.5),
     #axis.text.x.bottom = element_blank()
-    legend.title = element_text(size = 14, face = "bold"),
-    legend.text  = element_text(size = 8),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text  = element_text(size = 10),
     legend.key.size = unit(1, "lines")
   )
 
@@ -111,10 +115,10 @@ fig1 <- fig1 + guides(color = guide_legend(title = "Heterotic Groups"))
 
 #### combined environments for hybrids grain samples
 #### reading pheno data for hybrids
-pheno_19CS = read.csv("blues_19CS_hybrids_spectra.csv", check.names = FALSE)
-pheno_19TA = read.csv("blues_19TA_hybrids_spectra.csv", check.names = FALSE)
-pheno_20CS = read.csv("blues_20CS_hybrids_spectra.csv", check.names = FALSE)
-pheno_20MA = read.csv("blues_20MA_hybrids_spectra.csv", check.names = FALSE)
+pheno_19CS = read.csv("data/blues_19CS_hybrids_spectra.csv", check.names = FALSE)
+pheno_19TA = read.csv("data/blues_19TA_hybrids_spectra.csv", check.names = FALSE)
+pheno_20CS = read.csv("data/blues_20CS_hybrids_spectra.csv", check.names = FALSE)
+pheno_20MA = read.csv("data/blues_20MA_hybrids_spectra.csv", check.names = FALSE)
 
 pheno_combined = rbind(pheno_19CS,pheno_19TA, pheno_20CS, pheno_20MA)
 
@@ -138,6 +142,10 @@ fig2 = ggplot(lda_data, aes(x = LD1, y = LD2, color = Group)) +
        x = x ,
        y = y,
        color = "Group") +
+  scale_color_manual(values = c("19CS" = "#E41A1C",
+                                "19TA" = "#377EB8",
+                                "20CS" = "#4DAF4A",
+                                "20LY" = "#FF7F00"))+
   theme(
     # LABELS APPEARANCE
     plot.title = element_text(size=17, face= "bold", colour= "black" ),
@@ -163,11 +171,11 @@ library(ggpubr)
 merge1 = ggarrange(fig1,fig2,
                    ncol = 1, nrow = 2,
                    common.legend = FALSE,
-                   legend = c("bottom"))
+                   legend = c("right"))
 
 
 
-jpeg("pca_heterotic_env_NIR.jpeg",width = 8,height =10,units = "in", res=600)
+jpeg("pca_heterotic_env_NIRb.jpeg",width = 10,height =10,units = "in", res=600)
 merge1
 dev.off()
 
