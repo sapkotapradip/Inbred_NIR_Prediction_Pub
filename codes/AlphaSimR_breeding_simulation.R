@@ -125,8 +125,8 @@ cat(sprintf("  MapPop created: %d individuals, %d total markers.\n",
 # A-pool (female, cytoplasmic male-sterile maintainer lines): prefixes A*, AHF*, AKS*, AN*, ATx*
 # R-pool (male, restorer lines): prefixes R*, RTx*
 
-A_ids <- line_ids[grepl("^(A[0-9]|AHF|AKS|AN[0-9]|ATx)", line_ids)]
-R_ids <- line_ids[grepl("^(R[0-9]|RTx)",                  line_ids)]
+A_ids <- line_ids[grepl("^(A[0-9]+|AHF|AKS|AN[0-9]+|ATx)", line_ids)]
+R_ids <- line_ids[grepl("^(R[0-9]+|RTx)",                  line_ids)]
 
 cat(sprintf("  A-pool (female): %d lines | R-pool (male): %d lines\n",
             length(A_ids), length(R_ids)))
@@ -186,7 +186,7 @@ SP$addTraitA(
 SP$setVarE(varE = c(varE_gy, varE_ph, varE_dy))
 
 # Enable genomic selection marker tracking
-SP$addSnpChip(nSnpPerChr = 100)   # ~1,000 SNP chip markers for GS
+SP$addSnpChip(nSnpPerChr = 100)   # 1,000 SNP chip markers for GS (100 per chromosome × 10 chromosomes)
 
 # Re-create pools under the SimParam
 poolA <- newPop(founderPop[A_idx], simParam = SP)
@@ -239,11 +239,10 @@ varG  <- c()
 
 record_cycle <- function(pop, cycle_label) {
   gv <- gv(pop, simParam = SP)
-  cat(sprintf("  %s | nInd=%d | mean(GY)=%.1f | var(GY)=%.1f | F=%.3f\n",
+  cat(sprintf("  %s | nInd=%d | mean(GY)=%.1f | var(GY)=%.1f\n",
               cycle_label, pop@nInd,
               mean(gv[, "GY"]),
-              var(gv[, "GY"]),
-              meanP(pop, simParam = SP)  # proxy for inbreeding via homozygosity
+              var(gv[, "GY"])
   ))
   list(cycle = cycle_label, nInd = pop@nInd,
        meanGY = mean(gv[, "GY"]), varGY  = var(gv[, "GY"]))
@@ -267,13 +266,15 @@ for (cyc in seq_len(N_CYCLES)) {
     sel_A_idx <- select_parents_gs(poolA, hyb, SELECT_TOP)
     sel_R_idx <- select_parents_gs(poolR, hyb, SELECT_TOP)
   } else {
-    sel_A_idx <- select_parents_ps(hyb, SELECT_TOP)
-    sel_R_idx <- select_parents_ps(hyb, SELECT_TOP)
-    # Clip to valid range
-    sel_A_idx <- sel_A_idx[sel_A_idx <= poolA@nInd]
-    sel_R_idx <- sel_R_idx[sel_R_idx <= poolR@nInd]
-    if (length(sel_A_idx) == 0) sel_A_idx <- seq_len(min(3, poolA@nInd))
-    if (length(sel_R_idx) == 0) sel_R_idx <- seq_len(min(3, poolR@nInd))
+    # Phenotypic selection: evaluate parent pools directly and rank by GY
+    poolA_pheno <- setPheno(poolA, simParam = SP)
+    poolR_pheno <- setPheno(poolR, simParam = SP)
+    n_sel_A <- max(1L, round(poolA@nInd * SELECT_TOP))
+    n_sel_R <- max(1L, round(poolR@nInd * SELECT_TOP))
+    sel_A_idx <- order(pheno(poolA_pheno, simParam = SP)[, "GY"],
+                       decreasing = TRUE)[seq_len(n_sel_A)]
+    sel_R_idx <- order(pheno(poolR_pheno, simParam = SP)[, "GY"],
+                       decreasing = TRUE)[seq_len(n_sel_R)]
   }
 
   selA <- selectInd(poolA, individuals = sel_A_idx, simParam = SP)
@@ -339,21 +340,32 @@ if (FALSE) {  # set to TRUE to run the comparison (doubles runtime)
   results_ps <- list()
 
   for (cyc in seq_len(N_CYCLES)) {
-    hyb_ps     <- make_testcrosses(poolA_ps, poolR_ps)
-    hyb_ps     <- setPheno(hyb_ps, simParam = SP)
-    sel_A_ps   <- select_parents_ps(hyb_ps, SELECT_TOP)
-    sel_R_ps   <- select_parents_ps(hyb_ps, SELECT_TOP)
-    sel_A_ps   <- sel_A_ps[sel_A_ps <= poolA_ps@nInd]
-    sel_R_ps   <- sel_R_ps[sel_R_ps <= poolR_ps@nInd]
-    if (length(sel_A_ps) == 0) sel_A_ps <- seq_len(min(3, poolA_ps@nInd))
-    if (length(sel_R_ps) == 0) sel_R_ps <- seq_len(min(3, poolR_ps@nInd))
+    hyb_ps       <- make_testcrosses(poolA_ps, poolR_ps)
+    hyb_ps       <- setPheno(hyb_ps, simParam = SP)
 
-    sA_ps      <- selectInd(poolA_ps, individuals = sel_A_ps, simParam = SP)
-    sR_ps      <- selectInd(poolR_ps, individuals = sel_R_ps, simParam = SP)
-    poolA_ps   <- c(sA_ps, self(randCross(sA_ps, N_CROSSES, simParam = SP),
-                                nProgeny = 1, simParam = SP))
-    poolR_ps   <- c(sR_ps, self(randCross(sR_ps, N_CROSSES, simParam = SP),
-                                nProgeny = 1, simParam = SP))
+    # Rank parents directly by their own phenotypic value (consistent with main loop)
+    poolA_ps_ph  <- setPheno(poolA_ps, simParam = SP)
+    poolR_ps_ph  <- setPheno(poolR_ps, simParam = SP)
+    n_sel_A_ps   <- max(1L, round(poolA_ps@nInd * SELECT_TOP))
+    n_sel_R_ps   <- max(1L, round(poolR_ps@nInd * SELECT_TOP))
+    sel_A_ps     <- order(pheno(poolA_ps_ph, simParam = SP)[, "GY"],
+                          decreasing = TRUE)[seq_len(n_sel_A_ps)]
+    sel_R_ps     <- order(pheno(poolR_ps_ph, simParam = SP)[, "GY"],
+                          decreasing = TRUE)[seq_len(n_sel_R_ps)]
+
+    sA_ps        <- selectInd(poolA_ps, individuals = sel_A_ps, simParam = SP)
+    sR_ps        <- selectInd(poolR_ps, individuals = sel_R_ps, simParam = SP)
+
+    # Advance new inbreds through N_SELFINGS generations of selfing (same as main loop)
+    newA_ps <- randCross(sA_ps, N_CROSSES, simParam = SP)
+    newR_ps <- randCross(sR_ps, N_CROSSES, simParam = SP)
+    for (s in seq_len(N_SELFINGS)) {
+      newA_ps <- self(newA_ps, simParam = SP)
+      newR_ps <- self(newR_ps, simParam = SP)
+    }
+    poolA_ps <- c(sA_ps, newA_ps)
+    poolR_ps <- c(sR_ps, newR_ps)
+
     gv_ps      <- gv(hyb_ps, simParam = SP)
     results_ps[[paste0("C", cyc)]] <- data.frame(
       cycle  = paste0("C", cyc),
