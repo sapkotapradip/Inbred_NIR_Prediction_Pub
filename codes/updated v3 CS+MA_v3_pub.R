@@ -912,7 +912,7 @@ letters_df <- df2 %>%
     fit <- aov(cor ~ model, data = .x)
 
     emmeans(fit, ~ model) %>%
-      cld(adjust = "tukey", Letters = letters) %>%
+      cld(adjust = "tukey", Letters = letters, reversed = TRUE) %>%
       as.data.frame() %>%
       rename(letters = .group) %>%
       mutate(letters = gsub(" ", "", letters))
