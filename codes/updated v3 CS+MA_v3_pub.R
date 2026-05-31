@@ -868,6 +868,206 @@ for (tr in 1:length(traitnames)) {
 #################################
 
 # Plot results
+# Include posthoc analysis with posthoc analysis in prediction accuracy
+### Use this for Tukey's test and include four models by removing high parent heterosis
+df2 = read.csv("Pred.ability_4models_2cv_5rep.csv")
+
+#df1 <- as.data.frame(df2 %>%  dplyr::group_by(traits,model,CV,grains) %>% 
+                       #dplyr::summarise(M = mean(cor, na.rm=TRUE),
+                                       # SD = sd(cor, na.rm=TRUE),
+                                    #  n = sum(!is.na(cor)),
+                                   # .groups = "drop"))
+
+
+
+tukey_df <- df2 %>%
+  group_by(traits, CV, grains) %>%
+  group_modify(~ {
+    fit <- aov(cor ~ model, data = .x)
+    broom::tidy(TukeyHSD(fit, "model"))
+  }) %>%
+  ungroup()
+
+library(dplyr)
+library(emmeans)
+library(multcomp)
+install.packages("multcompView")
+library(multcompView)
+
+letters_df <- df2 %>%
+  group_by(traits, CV, grains) %>%
+  group_modify(~ {
+    if (n_distinct(.x$model) < 2) {
+      return(data.frame(
+        model = unique(.x$model),
+        emmean = NA_real_,
+        SE = NA_real_,
+        df = NA_real_,
+        lower.CL = NA_real_,
+        upper.CL = NA_real_,
+        letters = NA_character_
+      ))
+    }
+
+    fit <- aov(cor ~ model, data = .x)
+
+    emmeans(fit, ~ model) %>%
+      cld(adjust = "tukey", Letters = letters) %>%
+      as.data.frame() %>%
+      rename(letters = .group) %>%
+      mutate(letters = gsub(" ", "", letters))
+  }) %>%
+  ungroup()
+
+summary_df <- df2 %>%
+  dplyr::group_by(traits, CV, grains, model) %>%
+  dplyr::summarise(
+    M = mean(cor, na.rm = TRUE),
+    SD = sd(cor, na.rm = TRUE),
+    n = sum(!is.na(cor)),
+    SE = SD / sqrt(n),
+    .groups = "drop"
+  ) %>%
+  dplyr::left_join(
+    letters_df %>%
+      dplyr::select(traits, CV, grains, model, letters),
+    by = c("traits", "CV", "grains", "model")
+  )
+
+summary_df = as.data.frame(summary_df)
+
+##### plot with letters from Tukey's test
+df1_CV1 = summary_df[summary_df$CV == "CV1",]
+df1_CV2 = summary_df[summary_df$CV == "CV2",]
+
+df1_CV1 =
+  df1_CV1  %>%
+  mutate(
+    traits = case_when(
+      traits == "ash" ~ "Ash",
+      traits == "da" ~ "Days to Anthesis",
+      traits == "fat" ~ "Fat",
+      traits == "fiber" ~ "Fiber",
+      traits == "ph" ~ "Plant Height",
+      traits == "protein" ~ "Protein",
+      traits == "starch" ~ "Starch",
+      traits == "yield" ~ "Grain Yield",
+      TRUE~traits)
+  )
+
+df1_CV1$traits <- factor(df1_CV1$traits, levels =  c("Grain Yield", 
+                                                     "Plant Height", 
+                                                     "Days to Anthesis", 
+                                                     "Starch", 
+                                                     "Protein", 
+                                                     "Fat", 
+                                                     "Fiber", 
+                                                     "Ash"))
+
+
+p = ggplot(df1_CV1, aes(model, y=M, fill=model)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=letters, y = M +SE+ 0.1), color="black",
+            position = position_dodge(0.9), angle = 0,size=4, vjust = 0.5)+
+  geom_errorbar(aes(ymin=M - SE, ymax= M + SE), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~traits~grains)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Prediction Models") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 20, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 9, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
+
+p
+
+jpeg("Pred.ability_CV1_4models_sig.jpeg",width = 12,height =10,units = "in", res=600)
+p
+dev.off()
+
+
+# CV2
+
+df1_CV2 =
+  df1_CV2  %>%
+  mutate(
+    traits = case_when(
+      traits == "ash" ~ "Ash",
+      traits == "da" ~ "Days to Anthesis",
+      traits == "fat" ~ "Fat",
+      traits == "fiber" ~ "Fiber",
+      traits == "ph" ~ "Plant Height",
+      traits == "protein" ~ "Protein",
+      traits == "starch" ~ "Starch",
+      traits == "yield" ~ "Grain Yield",
+      TRUE~traits)
+  )
+
+df1_CV2$traits <- factor(df1_CV2$traits, levels =  c("Grain Yield", 
+                                                     "Plant Height", 
+                                                     "Days to Anthesis", 
+                                                     "Starch", 
+                                                     "Protein", 
+                                                     "Fat", 
+                                                     "Fiber", 
+                                                     "Ash"))
+
+
+p = ggplot(df1_CV2, aes(model, y=M, fill=model)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=letters, y = M + SE +0.1), color="black",
+            position = position_dodge(0.9), angle = 0,size=4, vjust = 0.5)+
+  geom_errorbar(aes(ymin=M - SE, ymax= M+SE), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~traits~grains)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Prediction Models") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 20, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 9, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
+
+p
+
+jpeg("Pred.ability_CV2_4models_sig.jpeg",width = 12,height =10,units = "in", res=600)
+p
+dev.off()
+####################################################################################################
+#################### Rough codes ###################################################################
+
+########## Donot use this ##################################
 setwd("output/results_5_19_manuscript/")
 ###lets plot
 library(plyr)
@@ -879,6 +1079,7 @@ list_csv_files <- list.files("../results_5_19_manuscript/")
 df2 <- readr::read_csv(list_csv_files, id = "file_name") %>% as.data.frame()
 df2
 write.csv(df2, "Pred.ability_11models_2cv_5rep.csv")
+
 df2 = read.csv("Pred.ability_6models_2cv_5rep.csv")
 
 df1 <- as.data.frame(df2 %>%  dplyr::group_by(traits,model,CV,grains) %>% 
@@ -1016,21 +1217,148 @@ jpeg("Pred.ability_CV2.jpeg",width = 12,height =10,units = "in", res=600)
 p
 dev.off()
 
+### keep only four models
+library(plyr)
+library(readr)
+library(dplyr)
+library(stringr)
+df2 = read.csv("output/the_plant_phenome_8_29/summary1.csv")
+df2 = df2[,-1]
+df2 = df2[!df2$models %in% c("M4","M5"),]
+df2$models[df2$models == "M6"] <- "M4"
 
 
+library(tidyr)
+library(ggplot2)
+
+df1_CV1 = df2[df2$CV == "CV1",]
+df1_CV2 = df2[df2$CV == "CV2",]
+
+df1_CV1 =
+  df1_CV1  %>%
+  mutate(
+    traits = case_when(
+      traits == "ash" ~ "Ash",
+      traits == "da" ~ "Days to Anthesis",
+      traits == "fat" ~ "Fat",
+      traits == "fiber" ~ "Fiber",
+      traits == "ph" ~ "Plant Height",
+      traits == "protein" ~ "Protein",
+      traits == "starch" ~ "Starch",
+      traits == "yield" ~ "Grain Yield",
+      TRUE~traits)
+  )
+
+df1_CV1$traits <- factor(df1_CV1$traits, levels =  c("Grain Yield", 
+                                                     "Plant Height", 
+                                                     "Days to Anthesis", 
+                                                     "Starch", 
+                                                     "Protein", 
+                                                     "Fat", 
+                                                     "Fiber", 
+                                                     "Ash"))
 
 
+p = ggplot(df1_CV1, aes(models, y=M, fill=models)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=round(M,2), y = M + 0.15), color="black",
+            position = position_dodge(0.9), angle = 0,size=3, vjust = 0.4)+
+  geom_errorbar(aes(ymin=M, ymax=M+(SD/2)), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~traits~grain)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Prediction Models") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 13, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 8, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
+
+p
+
+jpeg("Pred.ability_CV1_4models.jpeg",width = 12,height =10,units = "in", res=600)
+p
+dev.off()
 
 
+# CV2
+
+df1_CV2 =
+  df1_CV2  %>%
+  mutate(
+    traits = case_when(
+      traits == "ash" ~ "Ash",
+      traits == "da" ~ "Days to Anthesis",
+      traits == "fat" ~ "Fat",
+      traits == "fiber" ~ "Fiber",
+      traits == "ph" ~ "Plant Height",
+      traits == "protein" ~ "Protein",
+      traits == "starch" ~ "Starch",
+      traits == "yield" ~ "Grain Yield",
+      TRUE~traits)
+  )
+
+df1_CV2$traits <- factor(df1_CV2$traits, levels =  c("Grain Yield", 
+                                                     "Plant Height", 
+                                                     "Days to Anthesis", 
+                                                     "Starch", 
+                                                     "Protein", 
+                                                     "Fat", 
+                                                     "Fiber", 
+                                                     "Ash"))
 
 
+p = ggplot(df1_CV2, aes(models, y=M, fill=models)) +
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_text(aes(label=round(M,2), y = M + 0.2), color="black",
+            position = position_dodge(0.9), angle = 0,size=3, vjust = 0.4)+
+  geom_errorbar(aes(ymin=M, ymax=M+(SD/2)), width=.2,
+                position=position_dodge(.9))+
+  theme_bw()+
+  facet_grid(~traits~grain)+
+  scale_y_continuous("Prediction ability")+
+  xlab("Prediction Models") +
+  theme(axis.text.x = element_text(angle = 0, vjust = 0.5, hjust=0.5))+
+  
+  
+  theme(
+    # LABELS APPEARANCE
+    plot.title = element_text(size=5, face= "bold", colour= "black" ),
+    axis.title.x = element_text(size=17, face="bold", colour = "black"),    
+    axis.title.y = element_text(size=17, face="bold", colour = "black"),    
+    axis.text.x = element_text(size=12, face="bold", colour = "black"), 
+    # axis.text.y = element_text(size=22,  colour = "black"), # unbold
+    axis.text.y = element_text(size=12, face="bold", colour = "black"), # bold
+    strip.text.x = element_text(size = 13, face="bold", colour = "black" ),
+    strip.text.y = element_text(size = 8, face="bold", colour = "black"),
+    axis.line.x = element_line(color="black", size = 0.5),
+    axis.line.y = element_line(color="black", size = 0.5),
+    panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+    legend.position = "none"
+    #axis.text.x.bottom = element_blank()
+  )
 
-####################################################################################################
+p
 
-
-
-
-
+jpeg("Pred.ability_CV2_4models.jpeg",width = 12,height =10,units = "in", res=600)
+p
+dev.off()
+#############################################################################################################
 
 
 #################use parental phenotypic data:
