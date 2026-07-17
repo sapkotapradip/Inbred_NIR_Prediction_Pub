@@ -14,13 +14,13 @@ library(BGLR)
 pheno_19CS = read.csv("data/blues_19CS_hybrids_spectra.csv", check.names = FALSE)
 pheno_19TA = read.csv("data/blues_19TA_hybrids_spectra.csv", check.names = FALSE)
 pheno_20CS = read.csv("data/blues_20CS_hybrids_spectra.csv", check.names = FALSE)
-pheno_20MA = read.csv("data/blues_20MA_hybrids_spectra.csv", check.names = FALSE)
+pheno_20LY = read.csv("data/blues_20LY_hybrids_spectra.csv", check.names = FALSE)
 
 #### reading pheno data for inbreds
 parents_20CS = read.csv("data/blues_20CS_inbreds_spectra.csv", check.names = FALSE)
-parents_20MA = read.csv("data/blues_20MA_inbreds_spectra.csv", check.names = FALSE)
+parents_20LY = read.csv("data/blues_20LY_inbreds_spectra.csv", check.names = FALSE)
 
-pheno_combined = rbind(pheno_19CS,pheno_19TA, pheno_20CS, pheno_20MA)
+pheno_combined = rbind(pheno_19CS,pheno_19TA, pheno_20CS, pheno_20LY)
 ne <- as.vector(table(pheno_combined$env)) ## counting the number of observations
 ne
 
@@ -161,24 +161,24 @@ K6=K3star*ZEZEt #female*male*env
 rownames(pheno_19CS) = pheno_19CS$pedigree
 rownames(pheno_19TA) = pheno_19TA$pedigree
 rownames(pheno_20CS) = pheno_20CS$pedigree
-rownames(pheno_20MA) = pheno_20MA$pedigree
+rownames(pheno_20LY) = pheno_20LY$pedigree
 
 NIR_19CS = scale(savitzkyGolay(pheno_19CS[,-c(1:7)], m=1, p=1, w=11))
 NIR_19TA = scale(savitzkyGolay(pheno_19TA[,-c(1:7)], m=1, p=1, w=11))
 NIR_20CS = scale(savitzkyGolay(pheno_20CS[,-c(1:7)], m=1, p=1, w=11))
-NIR_20MA = scale(savitzkyGolay(pheno_20MA[,-c(1:7)], m=1, p=1, w=11))
+NIR_20LY = scale(savitzkyGolay(pheno_20LY[,-c(1:7)], m=1, p=1, w=11))
 
-NIR.d1 = rbind(NIR_19CS, NIR_19TA, NIR_20CS, NIR_20MA) 
+NIR.d1 = rbind(NIR_19CS, NIR_19TA, NIR_20CS, NIR_20LY) 
 ZN1 = tcrossprod(as.matrix(NIR.d1)/ncol(as.matrix(NIR.d1))) #phenomic relationship matrices
 dim(ZN1) #phenomic relationship matrices from hybrids
 
 midparent_20CS = read.csv("data/mid_parent_NIR_20CS_all.csv", check.names = FALSE)
-midparent_20MA = read.csv("data/mid_parent_NIR_20MA_all.csv", check.names = FALSE)
+midparent_20LY = read.csv("data/mid_parent_NIR_20LY_all.csv", check.names = FALSE)
 
 rownames(midparent_20CS) = midparent_20CS[,1]
-rownames(midparent_20MA) = midparent_20MA[,1]
+rownames(midparent_20LY) = midparent_20LY[,1]
 midparent_20CS = midparent_20CS[,-1]
-midparent_20MA = midparent_20MA[,-1]
+midparent_20LY = midparent_20LY[,-1]
 
 # Ensure the row names of averages_df are accessible
 # averages_pedigrees <- rownames(averages_df) this one is when calculating using above loop
@@ -187,18 +187,18 @@ pedigrees_list = pheno_combined$pedigree
 filtered_df_20CS <- midparent_20CS[rownames(midparent_20CS) %in% pedigrees_list, ]
 final_pedigree_20CS <- filtered_df_20CS[match(pedigrees_list, rownames(filtered_df_20CS)), ]
 
-filtered_df_20MA <- midparent_20MA[rownames(midparent_20MA) %in% pedigrees_list, ]
-final_pedigree_20MA <- filtered_df_20MA[match(pedigrees_list, rownames(filtered_df_20MA)), ]
+filtered_df_20LY <- midparent_20LY[rownames(midparent_20LY) %in% pedigrees_list, ]
+final_pedigree_20LY <- filtered_df_20LY[match(pedigrees_list, rownames(filtered_df_20LY)), ]
 
 mid_parent_19CS_20CS = final_pedigree_20CS[1:364,]
 mid_parent_19TA_20CS = final_pedigree_20CS[365:543,]
 mid_parent_20CS_20CS = final_pedigree_20CS[544:907,]
-mid_parent_20MA_20CS = final_pedigree_20CS[-c(1:907),]
+mid_parent_20LY_20CS = final_pedigree_20CS[-c(1:907),]
 
-mid_parent_19CS_20MA = final_pedigree_20MA[1:364,]
-mid_parent_19TA_20MA = final_pedigree_20MA[365:543,]
-mid_parent_20CS_20MA = final_pedigree_20MA[544:907,]
-mid_parent_20MA_20MA = final_pedigree_20MA[-c(1:907),]
+mid_parent_19CS_20LY = final_pedigree_20LY[1:364,]
+mid_parent_19TA_20LY = final_pedigree_20LY[365:543,]
+mid_parent_20CS_20LY = final_pedigree_20LY[544:907,]
+mid_parent_20LY_20LY = final_pedigree_20LY[-c(1:907),]
 
 ## estimate first derivative of mid-parent NIR spectra
 # using 20CS
@@ -206,30 +206,29 @@ mid_parent_20MA_20MA = final_pedigree_20MA[-c(1:907),]
 NIR_mid_parent_19CS_20CS = scale(savitzkyGolay(mid_parent_19CS_20CS, m=1, p=1, w=11))
 NIR_mid_parent_19TA_20CS = scale(savitzkyGolay(mid_parent_19TA_20CS, m=1, p=1, w=11))
 NIR_mid_parent_20CS_20CS = scale(savitzkyGolay(mid_parent_20CS_20CS, m=1, p=1, w=11))
-NIR_mid_parent_20MA_20CS = scale(savitzkyGolay(mid_parent_20MA_20CS, m=1, p=1, w=11))
+NIR_mid_parent_20LY_20CS = scale(savitzkyGolay(mid_parent_20LY_20CS, m=1, p=1, w=11))
 
 NIR_mid_parent.d1_20CS = rbind(NIR_mid_parent_19CS_20CS, 
                                NIR_mid_parent_19TA_20CS, 
                                NIR_mid_parent_20CS_20CS, 
-                               NIR_mid_parent_20MA_20CS)
+                               NIR_mid_parent_20LY_20CS)
 
 NIR_mid_parent.ZN1_20CS = tcrossprod(as.matrix(NIR_mid_parent.d1_20CS)/ncol(as.matrix(NIR_mid_parent.d1_20CS))) #phenomic relationship matrices
 dim(NIR_mid_parent.ZN1_20CS) #phenomic relationship matrices from hybrids
 
+# using 20LY
+NIR_mid_parent_19CS_20LY = scale(savitzkyGolay(mid_parent_19CS_20LY, m=1, p=1, w=11))
+NIR_mid_parent_19TA_20LY = scale(savitzkyGolay(mid_parent_19TA_20LY, m=1, p=1, w=11))
+NIR_mid_parent_20CS_20LY = scale(savitzkyGolay(mid_parent_20CS_20LY, m=1, p=1, w=11))
+NIR_mid_parent_20LY_20LY = scale(savitzkyGolay(mid_parent_20LY_20LY, m=1, p=1, w=11))
 
-# using 20MA
-NIR_mid_parent_19CS_20MA = scale(savitzkyGolay(mid_parent_19CS_20MA, m=1, p=1, w=11))
-NIR_mid_parent_19TA_20MA = scale(savitzkyGolay(mid_parent_19TA_20MA, m=1, p=1, w=11))
-NIR_mid_parent_20CS_20MA = scale(savitzkyGolay(mid_parent_20CS_20MA, m=1, p=1, w=11))
-NIR_mid_parent_20MA_20MA = scale(savitzkyGolay(mid_parent_20MA_20MA, m=1, p=1, w=11))
+NIR_mid_parent.d1_20LY = rbind(NIR_mid_parent_19CS_20LY, 
+                               NIR_mid_parent_19TA_20LY, 
+                               NIR_mid_parent_20CS_20LY, 
+                               NIR_mid_parent_20LY_20LY)
 
-NIR_mid_parent.d1_20MA = rbind(NIR_mid_parent_19CS_20MA, 
-                               NIR_mid_parent_19TA_20MA, 
-                               NIR_mid_parent_20CS_20MA, 
-                               NIR_mid_parent_20MA_20MA)
-
-NIR_mid_parent.ZN1_20MA = tcrossprod(as.matrix(NIR_mid_parent.d1_20MA)/ncol(as.matrix(NIR_mid_parent.d1_20MA))) #phenomic relationship matrices
-dim(NIR_mid_parent.ZN1_20MA) #phenomic relationship matrices from hybrids
+NIR_mid_parent.ZN1_20LY = tcrossprod(as.matrix(NIR_mid_parent.d1_20LY)/ncol(as.matrix(NIR_mid_parent.d1_20LY))) #phenomic relationship matrices
+dim(NIR_mid_parent.ZN1_20LY) #phenomic relationship matrices from hybrids
 
 ### Mid-parent heterosis ###
 # heterosis = F1-MP/MP
@@ -237,54 +236,53 @@ dim(NIR_mid_parent.ZN1_20MA) #phenomic relationship matrices from hybrids
 combined_NIR_F1 = rbind(pheno_19CS[,-c(1:7)],  #hybrid 
                         pheno_19TA[,-c(1:7)], 
                         pheno_20CS[,-c(1:7)],
-                        pheno_20MA[,-c(1:7)])
+                        pheno_20LY[,-c(1:7)])
 
 combined_NIR_MP = final_pedigree_20CS # mid-parent
 MP_heterosis_20CS = (combined_NIR_F1- combined_NIR_MP)/combined_NIR_MP
 MP_heterosis_20CS
 
-MP_heterosis_20MA = (combined_NIR_F1- final_pedigree_20MA)/final_pedigree_20MA
-MP_heterosis_20MA
-
+MP_heterosis_20LY = (combined_NIR_F1- final_pedigree_20LY)/final_pedigree_20LY
+MP_heterosis_20LY
 
 MP_heterosis_19CS_20CS = MP_heterosis_20CS[1:364,]
 MP_heterosis_19TA_20CS = MP_heterosis_20CS[365:543,]
 MP_heterosis_20CS_20CS = MP_heterosis_20CS[544:907,]
-MP_heterosis_20MA_20CS = MP_heterosis_20CS[-c(1:907),]
+MP_heterosis_20LY_20CS = MP_heterosis_20CS[-c(1:907),]
 
-MP_heterosis_19CS_20MA = MP_heterosis_20MA[1:364,]
-MP_heterosis_19TA_20MA = MP_heterosis_20MA[365:543,]
-MP_heterosis_20CS_20MA = MP_heterosis_20MA[544:907,]
-MP_heterosis_20MA_20MA = MP_heterosis_20MA[-c(1:907),]
+MP_heterosis_19CS_20LY = MP_heterosis_20LY[1:364,]
+MP_heterosis_19TA_20LY = MP_heterosis_20LY[365:543,]
+MP_heterosis_20CS_20LY = MP_heterosis_20LY[544:907,]
+MP_heterosis_20LY_20LY = MP_heterosis_20LY[-c(1:907),]
 
 
 ## estimate first derivative of mid-parent_heterosis NIR spectra
 NIR_MP_heterosis_19CS_20CS = scale(savitzkyGolay(MP_heterosis_19CS_20CS, m=1, p=1, w=11))
 NIR_MP_heterosis_19TA_20CS = scale(savitzkyGolay(MP_heterosis_19TA_20CS, m=1, p=1, w=11))
 NIR_MP_heterosis_20CS_20CS = scale(savitzkyGolay(MP_heterosis_20CS_20CS, m=1, p=1, w=11))
-NIR_MP_heterosis_20MA_20CS = scale(savitzkyGolay(MP_heterosis_20MA_20CS, m=1, p=1, w=11))
+NIR_MP_heterosis_20LY_20CS = scale(savitzkyGolay(MP_heterosis_20LY_20CS, m=1, p=1, w=11))
 
 NIR_MP_heterosis.d1_20CS = rbind(NIR_MP_heterosis_19CS_20CS, #combine all
                                  NIR_MP_heterosis_19TA_20CS, 
                                  NIR_MP_heterosis_20CS_20CS, 
-                                 NIR_MP_heterosis_20MA_20CS) 
+                                 NIR_MP_heterosis_20LY_20CS) 
 
 NIR_MP_heterosis.ZN1_20CS = tcrossprod(as.matrix(NIR_MP_heterosis.d1_20CS)/ncol(as.matrix(NIR_MP_heterosis.d1_20CS))) #phenomic relationship matrices
 dim(NIR_MP_heterosis.ZN1_20CS) #phenomic relationship matrices from NIR_mid_parent_heterosis
 
-#20MA
-NIR_MP_heterosis_19CS_20MA = scale(savitzkyGolay(MP_heterosis_19CS_20MA, m=1, p=1, w=11))
-NIR_MP_heterosis_19TA_20MA = scale(savitzkyGolay(MP_heterosis_19TA_20MA, m=1, p=1, w=11))
-NIR_MP_heterosis_20CS_20MA = scale(savitzkyGolay(MP_heterosis_20CS_20MA, m=1, p=1, w=11))
-NIR_MP_heterosis_20MA_20MA = scale(savitzkyGolay(MP_heterosis_20MA_20MA, m=1, p=1, w=11))
+#20LY
+NIR_MP_heterosis_19CS_20LY = scale(savitzkyGolay(MP_heterosis_19CS_20LY, m=1, p=1, w=11))
+NIR_MP_heterosis_19TA_20LY = scale(savitzkyGolay(MP_heterosis_19TA_20LY, m=1, p=1, w=11))
+NIR_MP_heterosis_20CS_20LY = scale(savitzkyGolay(MP_heterosis_20CS_20LY, m=1, p=1, w=11))
+NIR_MP_heterosis_20LY_20LY = scale(savitzkyGolay(MP_heterosis_20LY_20LY, m=1, p=1, w=11))
 
-NIR_MP_heterosis.d1_20MA = rbind(NIR_MP_heterosis_19CS_20MA, #combine all
-                                 NIR_MP_heterosis_19TA_20MA, 
-                                 NIR_MP_heterosis_20CS_20MA, 
-                                 NIR_MP_heterosis_20MA_20MA) 
+NIR_MP_heterosis.d1_20LY = rbind(NIR_MP_heterosis_19CS_20LY, #combine all
+                                 NIR_MP_heterosis_19TA_20LY, 
+                                 NIR_MP_heterosis_20CS_20LY, 
+                                 NIR_MP_heterosis_20LY_20LY) 
 
-NIR_MP_heterosis.ZN1_20MA = tcrossprod(as.matrix(NIR_MP_heterosis.d1_20MA)/ncol(as.matrix(NIR_MP_heterosis.d1_20MA))) #phenomic relationship matrices
-dim(NIR_MP_heterosis.ZN1_20MA) #phenomic relationship matrices from NIR_mid_parent_heterosis
+NIR_MP_heterosis.ZN1_20LY = tcrossprod(as.matrix(NIR_MP_heterosis.d1_20LY)/ncol(as.matrix(NIR_MP_heterosis.d1_20LY))) #phenomic relationship matrices
+dim(NIR_MP_heterosis.ZN1_20LY) #phenomic relationship matrices from NIR_mid_parent_heterosis
 
 # calculating NIR x E interaction for different models using Hadamard product
 # 20CS
@@ -292,10 +290,10 @@ mid_parent.ZNZE1.CS             = NIR_mid_parent.ZN1_20CS * ZEZEt
 mid_parent_heterosis_ZNZE1.CS   = NIR_MP_heterosis.ZN1_20CS * ZEZEt
 
 # calculating NIR x E interaction for different models using Hadamard product
-#20MA
+#20LY
 
-mid_parent.ZNZE1.MA             = NIR_mid_parent.ZN1_20MA * ZEZEt
-mid_parent_heterosis_ZNZE1.MA   = NIR_MP_heterosis.ZN1_20MA * ZEZEt
+mid_parent.ZNZE1.LY             = NIR_mid_parent.ZN1_20LY * ZEZEt
+mid_parent_heterosis_ZNZE1.LY   = NIR_MP_heterosis.ZN1_20LY * ZEZEt
 
 # Set ETAs predictors for models
 # Genomic model
@@ -343,16 +341,16 @@ Eta1_LY <- list(list(X = ZE, model = "BRR"),     # Env
 
 ##### first derivative of mid_parent NIR
 Eta2_LY <- list(list(X = ZE, model = "BRR"),      #Env
-           list(K= NIR_mid_parent.ZN1_20MA, model = "RKHS"),    #NIR1
-           list(K = mid_parent.ZNZE1.MA, model = "RKHS")) #NIR1 x Env
+           list(K= NIR_mid_parent.ZN1_20LY, model = "RKHS"),    #NIR1
+           list(K = mid_parent.ZNZE1.LY, model = "RKHS")) #NIR1 x Env
 
 
 ##### first derivative of mid_parent heterosis NIR
 Eta3_LY <- list(list(X = ZE,model="BRR"),      #Env
-           list(K = NIR_MP_heterosis.ZN1_20MA, model="RKHS"),    #NIR1
-           list(K = mid_parent_heterosis_ZNZE1.MA, model="RKHS"))  #NIR1 x Env
+           list(K = NIR_MP_heterosis.ZN1_20LY, model="RKHS"),    #NIR1
+           list(K = mid_parent_heterosis_ZNZE1.LY, model="RKHS"))  #NIR1 x Env
 
-##### first derivative of mid_parent NIR + genomic 20MA
+##### first derivative of mid_parent NIR + genomic 20LY
 Eta4_LY <- list(list(X = ZE, model = "BRR"),     # Env
                 list(K = K1star, model = "RKHS"), # Female
                 list(K = K2star, model = "RKHS"), # male
@@ -360,14 +358,14 @@ Eta4_LY <- list(list(X = ZE, model = "BRR"),     # Env
                 list(K = K4, model = "RKHS"), #female x env
                 list(K = K5, model = "RKHS"), #male x env
                 list(K = K6, model = "RKHS"), #female x male x env
-                list(K=NIR_mid_parent.ZN1_20MA, model="RKHS"),    #NIR1_mid_parent
-                list(K=mid_parent.ZNZE1.MA, model="RKHS")) #NIR x env
+                list(K=NIR_mid_parent.ZN1_20LY, model="RKHS"),    #NIR1_mid_parent
+                list(K=mid_parent.ZNZE1.LY, model="RKHS")) #NIR x env
 
 
 ### 4 different models 
 # MODEL 1: Genomic model
-# MODEL 2: Mid-parent model
-# MODEL 3: mid_parent heterosis
+# MODEL 2: Mid-parent phenomic model
+# MODEL 3: mid_parent heterosis phenomic model
 # MODEL 4: first derivative of mid_parent NIR + genomic
 
 Models <- list(Eta1_CS, Eta2_CS, Eta3_CS, Eta4_CS)
@@ -415,7 +413,7 @@ for (tr in 1:length(traitnames)) {
   #MODEL =1; rep_num=1
   for (MODEL in 1:length(Models)) {  
     
-    for (rep_num in 1:5) {
+    for (rep_num in 1:20) {
       #set.seed(123)
       CVa = sample(parents[1:89], 15, replace = FALSE)
       train_geno <- setdiff(parents[1:89], CVa)
@@ -447,19 +445,19 @@ for (tr in 1:length(traitnames)) {
                 burnIn=1000, 
                 thin=10) #nIter=5000,burnIn=1000, thin =10
       
-      g_var = var(fit$ETA[[2]]$u[test_id]) + var(fit$ETA[[3]]$u[test_id]) + var(fit$ETA[[4]]$u[test_id])
+      #g_var = var(fit$ETA[[2]]$u[test_id]) + var(fit$ETA[[3]]$u[test_id]) + var(fit$ETA[[4]]$u[test_id])
       
       CV_Data_1_2$yhat <- fit$yHat
       
       # CV1 # untested genotypes in observed environment
       df_test <- subset(CV_Data_1_2, CV_Data_1_2$pedigree %in% test_geno)
       CV1[[(rep_num)]] <- as.data.frame(df_test %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat,use = "complete.obs")))
-      CV1[[rep_num]]$h2 = g_var / var(df_test$blue)
-      CV1[[rep_num]]$cor_cor = CV1[[rep_num]]$cor/h2
       
-      estimate_gcor(data=df_test, Knn=K_test, method="MCMCglmm", normalize=F)[1]
-      
+      #CV1[[rep_num]]$h2 = g_var / var(df_test$blue)
+      #CV1[[rep_num]]$cor_cor = CV1[[rep_num]]$cor/h2
+      #estimate_gcor(data=df_test, Knn=K_test, method="MCMCglmm", normalize=F)[1]
       # Preparing for CV2
+      
       # CV2 simulates sparse testing where 30% of hybrids were sampled from each environments
       
       test_geno = sample(unique(pedigrees_list), round(length(unique(pedigrees_list))*0.3))
@@ -522,14 +520,14 @@ for (tr in 1:length(traitnames)) {
       # CV3_19TA[[(rep_num)]] <- as.data.frame(df_test3 %>% group_by(env) %>% dplyr::summarize(cor=cor(blue, yhat3,use = "complete.obs")))
     }
     
-    #rep_num =1
-    if (rep_num == 5) {
+    # rep_num =1
+    if (rep_num == 20) {
       CV1out <- plyr::ldply(CV1, data.frame)
       CV2out <- plyr::ldply(CV2, data.frame)
       #CV3out_20LY <- plyr::ldply(CV3_20LY, data.frame)
       #CV3out_19TA <- plyr::ldply(CV3_19TA, data.frame)
-      write.csv(CV1out, file = paste("ACC_", traitnames[tr],"_CV1_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
-      write.csv(CV2out, file = paste("ACC_", traitnames[tr],"_CV2_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV1out, file = paste("Results_7_7/ACC_", traitnames[tr],"_CV1_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
+      write.csv(CV2out, file = paste("Results_7_7/ACC_", traitnames[tr],"_CV2_20CS_", MODEL, ".csv", sep=""), row.names = FALSE)
       #write.csv(CV3out_20LY, file = paste("ACC_", traitnames[tr],"_CV3_20CS_20LY_", MODEL, ".csv", sep=""), row.names = FALSE)
       #write.csv(CV3out_19TA, file = paste("ACC_", traitnames[tr],"_CV3_20CS_19TA_", MODEL, ".csv", sep=""), row.names = FALSE)
     }
@@ -538,7 +536,7 @@ for (tr in 1:length(traitnames)) {
 
 # started on 2:14 PM 5/12
 
-### 20MA
+### 20LY
 Models <- list(Eta1_LY, Eta2_LY, Eta3_LY, Eta4_LY, Eta5_LY, Eta6_LY)
 traitnames <- c("yield", "da", "ph", "starch", "protein", "fat", "fiber", "ash")
 pheno_combined[1:10,1:10]
